@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1280, initial-scale=1">
+    <meta name="description" content="Cat Clicker is a premium desktop-first cat adventure clicker with account-backed progression.">
+    <title>Cat Clicker - Premium Desktop Cat Adventure</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body data-theme="theme-midnight" data-animation="high">
+    <div class="backdrop-pattern" aria-hidden="true"></div>
+
+    <div id="loading-screen" class="loading-screen is-visible" aria-live="polite">
+      <div class="loader-card">
+        <div class="loader-mark">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <strong>Preparing Cat Clicker</strong>
+        <p>Loading account systems, gallery data, battle rules, and audio engine.</p>
+      </div>
+    </div>
+
+    <main id="auth-screen" class="auth-screen" hidden>
+      <section class="auth-art">
+        <div class="brand-lockup">
+          <span class="brand-sigil">CC</span>
+          <div>
+            <p>Premium desktop web game</p>
+            <h1>Cat Clicker</h1>
+          </div>
+        </div>
+        <div class="auth-pitch">
+          <span>Account required</span>
+          <h2>Collect powerful cats, clear bosses, grow your gallery, and keep every reward forever.</h2>
+          <p>Designed for large screens, mouse clicks, keyboard shortcuts, autosave history, and high-performance desktop browsers.</p>
+        </div>
+        <div class="auth-feature-grid">
+          <div><strong>Cloud-ready saves</strong><span>Backend account storage with restore history.</span></div>
+          <div><strong>Layered progression</strong><span>Cats, upgrades, skills, quests, bosses, and achievements.</span></div>
+          <div><strong>Premium feedback</strong><span>Animated clicks, procedural music, battle sounds, and reward effects.</span></div>
+        </div>
+      </section>
+
+      <section class="auth-panel">
+        <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
+          <button type="button" data-auth-mode="login" class="is-active">Sign in</button>
+          <button type="button" data-auth-mode="signup">Sign up</button>
+        </div>
+        <form id="auth-form" class="auth-form" data-mode="login">
+          <div>
+            <span class="panel-kicker">Protected account slot</span>
+            <h2 id="auth-title">Sign in to Cat Clicker</h2>
+            <p id="auth-hint">No guest mode. Your cats, currency, battles, and story load from your account.</p>
+          </div>
+          <label id="display-name-field" hidden>
+            <span>Display name</span>
+            <input name="displayName" autocomplete="nickname" maxlength="24" placeholder="Royal Whisker">
+          </label>
+          <label>
+            <span>Username</span>
+            <input name="username" autocomplete="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" placeholder="cat_captain">
+          </label>
+          <label>
+            <span>Password</span>
+            <input name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters">
+          </label>
+          <p id="auth-error" class="auth-error" role="alert"></p>
+          <button id="auth-submit" class="primary-action wide" type="submit">Sign In</button>
+          <p class="auth-note">This prototype stores password hashes and save files on the Node backend. Use a unique test password while developing.</p>
+        </form>
+      </section>
+    </main>
+
+    <div id="game-shell" class="game-shell" hidden>
+      <aside class="sidebar">
+        <div class="side-brand">
+          <span class="brand-sigil">CC</span>
+          <div>
+            <strong>Cat Clicker</strong>
+            <small>Desktop adventure</small>
+          </div>
+        </div>
+        <nav id="main-nav" class="main-nav" aria-label="Main game views">
+          <button data-view="overview" class="is-active"><span>01</span>Overview</button>
+          <button data-view="cats"><span>02</span>Cats</button>
+          <button data-view="shop"><span>03</span>Shop</button>
+          <button data-view="battle"><span>04</span>Battle</button>
+          <button data-view="achievements"><span>05</span>Badges</button>
+          <button data-view="inventory"><span>06</span>Inventory</button>
+          <button data-view="leaderboard"><span>07</span>Leaderboard</button>
+          <button data-view="settings"><span>08</span>Settings</button>
+        </nav>
+        <div class="desktop-card">
+          <strong>Desktop-first</strong>
+          <span>Best at 1180px+ with mouse, keyboard, and audio enabled.</span>
+          <kbd>Space</kbd>
+          <small>click featured cat</small>
+        </div>
+      </aside>
+
+      <section class="play-space">
+        <header class="topbar">
+          <div class="player-pill">
+            <span class="avatar-dot"></span>
+            <div>
+              <strong id="profile-name">Cat Captain</strong>
+              <small id="profile-title">Rookie Whisker - Lv 1</small>
+            </div>
+          </div>
+          <div class="hud-strip">
+            <div class="hud-item"><span>Coins</span><strong id="coin-readout">0</strong></div>
+            <div class="hud-item"><span>Gems</span><strong id="gem-readout">0</strong></div>
+            <div class="hud-item"><span>Idle</span><strong id="idle-readout">0/sec</strong></div>
+            <div class="hud-item save"><span>Save</span><strong id="save-status">Not loaded</strong></div>
+          </div>
+        </header>
+        <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+        <div id="view-root" class="view-root"></div>
+      </section>
+    </div>
+
+    <aside class="screen-warning">
+      <strong>Cat Clicker is desktop-only.</strong>
+      <span>Open this game on a larger display for the intended layout, animation, audio, and battle UI.</span>
+    </aside>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>
