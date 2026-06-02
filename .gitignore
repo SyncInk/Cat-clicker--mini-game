@@ -1,6 +1,0 @@
-data/db.json
-data/db.json.tmp
-node_modules/
-.DS_Store
-*.log
-*.err
