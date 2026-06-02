@@ -1,0 +1,21 @@
+{
+  "name": "cat-clicker-premium",
+  "version": "1.0.0",
+  "description": "Desktop-first premium cat adventure clicker with account-backed progression.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "game",
+    "clicker",
+    "cats",
+    "node",
+    "html",
+    "css",
+    "javascript"
+  ],
+  "author": "",
+  "license": "MIT"
+}
