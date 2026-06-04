@@ -51,6 +51,15 @@ export async function login({ username, password }) {
   return result;
 }
 
+export async function googleLogin(credential) {
+  const result = await apiRequest("/api/auth/google", {
+    method: "POST",
+    body: { credential }
+  });
+  setToken(result.token);
+  return result;
+}
+
 export async function logout() {
   const token = localStorage.getItem('catClickerToken');
   await fetch('/api/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });

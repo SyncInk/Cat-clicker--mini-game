@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cat Clicker — Sign In</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     /* ── Reset & Base ───────────────────────────────────── */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -345,40 +346,12 @@
       font-weight: 600;
     }
 
-    /* ── Google Button ─────────────────────────────────── */
-    .btn-google {
+    /* ── Google Button Container ─────────────────────────────────── */
+    #googleBtn {
       width: 100%;
       display: flex;
-      align-items: center;
       justify-content: center;
-      gap: 12px;
-      padding: 13px 20px;
-      background: #1a1a2e;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.2s;
-    }
-
-    .btn-google svg {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    }
-
-    .btn-google:hover {
-      background: #232340;
-      border-color: rgba(255, 255, 255, 0.22);
-      box-shadow: 0 0 24px -6px rgba(0, 240, 255, 0.10);
-      transform: translateY(-1px);
-    }
-
-    .btn-google:active {
-      transform: translateY(0) scale(0.985);
+      margin-top: 8px;
     }
 
     /* ── Misc ──────────────────────────────────────────── */
@@ -492,16 +465,7 @@
       <div class="divider"><span>or</span></div>
 
       <!-- Google button -->
-      <button type="button" class="btn-google" id="googleBtn">
-        <svg viewBox="0 0 48 48">
-          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-          <path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.0 24.0 0 0 0 0 21.56l7.98-6.19z"/>
-          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-          <path fill="none" d="M0 0h48v48H0z"/>
-        </svg>
-        Continue with Google
-      </button>
+      <div id="googleBtn"></div>
 
       <div class="footer-note">
         &copy; 2026 Cat Clicker &middot; meow-powered
@@ -667,10 +631,43 @@
       }
     });
 
-    /* Google placeholder */
-    googleBtn.addEventListener('click', () => {
-      alert('Google login coming soon');
-    });
+    /* Google Sign In */
+    function handleCredentialResponse(response) {
+      if (!response.credential) {
+        showError('Google sign in failed');
+        return;
+      }
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+      fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential })
+      })
+      .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, body: data })))
+      .then(({ status, ok, body }) => {
+        if (!ok) throw new Error(body.error || 'Google sign in failed');
+        localStorage.setItem('catClickerToken', body.token);
+        localStorage.setItem('catClickerProfile', JSON.stringify(body.profile));
+        window.location.href = '/index.html';
+      })
+      .catch(err => {
+        showError(err.message);
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      });
+    }
+
+    window.onload = function () {
+      google.accounts.id.initialize({
+        client_id: "381684954560-05h9kgiof2jqja4i94t4c31o7omn3ue0.apps.googleusercontent.com",
+        callback: handleCredentialResponse
+      });
+      google.accounts.id.renderButton(
+        document.getElementById("googleBtn"),
+        { theme: "filled_black", size: "large", width: 356, text: "continue_with", shape: "rectangular", logo_alignment: "left" }
+      );
+    };
   </script>
 </body>
 </html>

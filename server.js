@@ -340,6 +340,62 @@ async function handleApi(req, res, url) {
       return;
     }
 
+    if (req.method === "POST" && url.pathname === "/api/auth/google") {
+      const body = await readJson(req);
+      const credential = String(body.credential || "");
+      if (!credential) {
+        json(res, 400, { error: "Missing credential" });
+        return;
+      }
+      try {
+        const payloadBase64 = credential.split(".")[1];
+        const payloadJson = Buffer.from(payloadBase64, "base64").toString("utf8");
+        const payload = JSON.parse(payloadJson);
+        const email = normalizeUsername(payload.email);
+        const displayName = String(payload.name || email).trim().slice(0, 24);
+
+        if (!email) {
+          json(res, 400, { error: "Google token did not contain an email." });
+          return;
+        }
+
+        const result = await withDb(async (db) => {
+          let user = db.users[email];
+          const now = nowIso();
+          if (!user) {
+            user = {
+              id: String(db.nextUserId++),
+              username: email,
+              displayName,
+              password: hashPassword(crypto.randomBytes(32).toString("hex")),
+              sessions: [],
+              save: null,
+              saveRevision: 0,
+              saveHistory: [],
+              createdAt: now,
+              updatedAt: now
+            };
+            db.users[email] = user;
+          }
+          
+          const token = createToken();
+          user.sessions ||= [];
+          user.sessions = user.sessions.filter((session) => Date.parse(session.expiresAt) > Date.now());
+          user.sessions.push({
+            tokenHash: hashToken(token),
+            createdAt: now,
+            expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString()
+          });
+          user.updatedAt = now;
+          return { token, profile: publicProfile(user) };
+        });
+        json(res, 200, result);
+      } catch (err) {
+        json(res, 400, { error: "Invalid Google credential" });
+      }
+      return;
+    }
+
     if (req.method === "POST" && url.pathname === "/api/logout") {
       const token = getBearerToken(req);
       if (!token) {
