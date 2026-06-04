@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=1280, initial-scale=1">
     <meta name="description" content="Cat Clicker is a premium desktop-first cat adventure clicker with account-backed progression.">
     <title>Cat Clicker - Premium Desktop Cat Adventure</title>
+    <script>
+      if (!localStorage.getItem('catClickerToken')) {
+        window.location.href = '/auth.html';
+      }
+    </script>
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body data-theme="theme-midnight" data-animation="high">
@@ -22,56 +27,7 @@
       </div>
     </div>
 
-    <main id="auth-screen" class="auth-screen" hidden>
-      <section class="auth-art">
-        <div class="brand-lockup">
-          <span class="brand-sigil">CC</span>
-          <div>
-            <p>Premium desktop web game</p>
-            <h1>Cat Clicker</h1>
-          </div>
-        </div>
-        <div class="auth-pitch">
-          <span>Account required</span>
-          <h2>Collect powerful cats, clear bosses, grow your gallery, and keep every reward forever.</h2>
-          <p>Designed for large screens, mouse clicks, keyboard shortcuts, autosave history, and high-performance desktop browsers.</p>
-        </div>
-        <div class="auth-feature-grid">
-          <div><strong>Cloud-ready saves</strong><span>Backend account storage with restore history.</span></div>
-          <div><strong>Layered progression</strong><span>Cats, upgrades, skills, quests, bosses, and achievements.</span></div>
-          <div><strong>Premium feedback</strong><span>Animated clicks, procedural music, battle sounds, and reward effects.</span></div>
-        </div>
-      </section>
 
-      <section class="auth-panel">
-        <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
-          <button type="button" data-auth-mode="login" class="is-active">Sign in</button>
-          <button type="button" data-auth-mode="signup">Sign up</button>
-        </div>
-        <form id="auth-form" class="auth-form" data-mode="login">
-          <div>
-            <span class="panel-kicker">Protected account slot</span>
-            <h2 id="auth-title">Sign in to Cat Clicker</h2>
-            <p id="auth-hint">No guest mode. Your cats, currency, battles, and story load from your account.</p>
-          </div>
-          <label id="display-name-field" hidden>
-            <span>Display name</span>
-            <input name="displayName" autocomplete="nickname" maxlength="24" placeholder="Royal Whisker">
-          </label>
-          <label>
-            <span>Username</span>
-            <input name="username" autocomplete="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" placeholder="cat_captain">
-          </label>
-          <label>
-            <span>Password</span>
-            <input name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters">
-          </label>
-          <p id="auth-error" class="auth-error" role="alert"></p>
-          <button id="auth-submit" class="primary-action wide" type="submit">Sign In</button>
-          <p class="auth-note">This prototype stores password hashes and save files on the Node backend. Use a unique test password while developing.</p>
-        </form>
-      </section>
-    </main>
 
     <div id="game-shell" class="game-shell" hidden>
       <aside class="sidebar">
@@ -91,6 +47,7 @@
           <button data-view="inventory"><span>06</span>Inventory</button>
           <button data-view="leaderboard"><span>07</span>Leaderboard</button>
           <button data-view="settings"><span>08</span>Settings</button>
+          <button data-action="logout" class="danger-action"><span>09</span>Logout</button>
         </nav>
         <div class="desktop-card">
           <strong>Desktop-first</strong>

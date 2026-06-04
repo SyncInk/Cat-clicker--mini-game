@@ -66,9 +66,9 @@ export class AudioDirector {
   }
 
   click(crit = false) {
-    const volume = 0.13 * this.settings.sfxVolume;
-    this.tone({ frequency: crit ? 980 : 660, duration: 0.055, type: "triangle", volume, bend: crit ? 220 : 60 });
-    this.tone({ frequency: crit ? 1470 : 990, duration: 0.07, type: "sine", volume: volume * 0.45, delay: 0.025 });
+    const volume = 0.15 * this.settings.sfxVolume;
+    this.tone({ frequency: crit ? 1046 : 880, duration: 0.08, type: crit ? "square" : "sine", volume, bend: crit ? 300 : 80 });
+    this.tone({ frequency: crit ? 1567 : 1320, duration: 0.1, type: "triangle", volume: volume * 0.6, delay: 0.02 });
   }
 
   reward() {
@@ -79,10 +79,11 @@ export class AudioDirector {
   }
 
   upgrade() {
-    const volume = 0.16 * this.settings.sfxVolume;
-    this.tone({ frequency: 392, duration: 0.09, type: "square", volume });
-    this.tone({ frequency: 587, duration: 0.12, type: "triangle", volume: volume * 0.8, delay: 0.065, bend: 120 });
-    this.noise({ duration: 0.13, volume: 0.045 * this.settings.sfxVolume, delay: 0.02 });
+    const volume = 0.2 * this.settings.sfxVolume;
+    this.tone({ frequency: 440, duration: 0.1, type: "square", volume });
+    this.tone({ frequency: 659, duration: 0.15, type: "triangle", volume: volume * 0.9, delay: 0.05, bend: 200 });
+    this.tone({ frequency: 880, duration: 0.2, type: "sine", volume: volume * 0.5, delay: 0.1 });
+    this.noise({ duration: 0.15, volume: 0.05 * this.settings.sfxVolume, delay: 0.02 });
   }
 
   battle(win = true) {

@@ -1,4 +1,4 @@
-const TOKEN_KEY = "cat-clicker-session-token";
+const TOKEN_KEY = "catClickerToken";
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -52,11 +52,11 @@ export async function login({ username, password }) {
 }
 
 export async function logout() {
-  try {
-    await apiRequest("/api/logout", { method: "POST", body: {} });
-  } finally {
-    setToken(null);
-  }
+  const token = localStorage.getItem('catClickerToken');
+  await fetch('/api/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+  localStorage.removeItem('catClickerToken');
+  localStorage.removeItem('catClickerProfile');
+  window.location.href = '/auth.html';
 }
 
 export async function fetchSave() {

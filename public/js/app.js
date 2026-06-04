@@ -87,7 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function cacheElements() {
   els.loading = document.querySelector("#loading-screen");
-  els.auth = document.querySelector("#auth-screen");
   els.game = document.querySelector("#game-shell");
   els.viewRoot = document.querySelector("#view-root");
   els.toastStack = document.querySelector("#toast-stack");
@@ -98,26 +97,15 @@ function cacheElements() {
   els.idleReadout = document.querySelector("#idle-readout");
   els.saveStatus = document.querySelector("#save-status");
   els.nav = document.querySelector("#main-nav");
-  els.authForm = document.querySelector("#auth-form");
-  els.authTitle = document.querySelector("#auth-title");
-  els.authHint = document.querySelector("#auth-hint");
-  els.displayNameField = document.querySelector("#display-name-field");
-  els.authSubmit = document.querySelector("#auth-submit");
-  els.authError = document.querySelector("#auth-error");
 }
 
 async function boot() {
+  if (!getToken()) return;
   showLoading(true);
-  if (!getToken()) {
-    showAuth();
-    showLoading(false);
-    return;
-  }
   try {
     await loadAccount();
   } catch (error) {
     showToast(error.message, "danger");
-    showAuth();
   } finally {
     showLoading(false);
   }
@@ -128,7 +116,6 @@ function wireEvents() {
   document.body.addEventListener("change", handleChange);
   document.body.addEventListener("input", handleInput);
   document.addEventListener("keydown", handleKey);
-  els.authForm.addEventListener("submit", handleAuthSubmit);
   window.addEventListener("beforeunload", () => {
     if (!save || !dirty) return;
     save.meta.lastSavedAt = new Date().toISOString();
@@ -144,29 +131,6 @@ function wireEvents() {
       keepalive: true
     }).catch(() => {});
   });
-}
-
-async function handleAuthSubmit(event) {
-  event.preventDefault();
-  els.authError.textContent = "";
-  const mode = els.authForm.dataset.mode || "login";
-  const data = new FormData(els.authForm);
-  const username = String(data.get("username") || "").trim();
-  const password = String(data.get("password") || "");
-  const displayName = String(data.get("displayName") || "").trim();
-  try {
-    showLoading(true);
-    if (mode === "signup") {
-      await signup({ username, password, displayName });
-    } else {
-      await login({ username, password });
-    }
-    await loadAccount();
-  } catch (error) {
-    els.authError.textContent = error.message;
-  } finally {
-    showLoading(false);
-  }
 }
 
 async function loadAccount() {
@@ -191,19 +155,15 @@ async function loadAccount() {
 }
 
 function showLoading(visible) {
-  els.loading.classList.toggle("is-visible", visible);
-}
-
-function showAuth() {
-  stopLoops();
-  els.auth.hidden = false;
-  els.game.hidden = true;
-  switchAuthMode("login");
+  if (els.loading) {
+    els.loading.classList.toggle("is-visible", visible);
+  }
 }
 
 function showGame() {
-  els.auth.hidden = true;
-  els.game.hidden = false;
+  if (els.game) {
+    els.game.hidden = false;
+  }
 }
 
 function startLoops() {
@@ -268,28 +228,7 @@ async function saveNow(reason = "manual") {
     updateHud();
   }
 }
-
-function switchAuthMode(mode) {
-  els.authForm.dataset.mode = mode;
-  els.authTitle.textContent = mode === "signup" ? "Create your Cat Clicker account" : "Sign in to Cat Clicker";
-  els.authHint.textContent =
-    mode === "signup"
-      ? "Progress starts in a permanent account slot with autosave history."
-      : "No guest mode. Your cats, currency, battles, and story load from your account.";
-  els.displayNameField.hidden = mode !== "signup";
-  els.authSubmit.textContent = mode === "signup" ? "Create Account" : "Sign In";
-  for (const button of document.querySelectorAll("[data-auth-mode]")) {
-    button.classList.toggle("is-active", button.dataset.authMode === mode);
-  }
-}
-
 async function handleClick(event) {
-  const authMode = event.target.closest("[data-auth-mode]");
-  if (authMode) {
-    switchAuthMode(authMode.dataset.authMode);
-    return;
-  }
-
   const viewButton = event.target.closest("[data-view]");
   if (viewButton) {
     activeView = viewButton.dataset.view;
@@ -374,9 +313,6 @@ async function handleClick(event) {
     case "logout":
       await saveNow("manual");
       await logout();
-      save = null;
-      profile = null;
-      showAuth();
       break;
     default:
       break;
@@ -512,7 +448,8 @@ async function handleRestore(historyId) {
 
 function updateHud() {
   if (!save) return;
-  els.profileName.textContent = save.player.displayName || profile?.displayName || "Cat Captain";
+  const storedProfile = JSON.parse(localStorage.getItem('catClickerProfile') || '{}');
+  els.profileName.textContent = save.player.displayName || storedProfile.displayName || "Cat Captain";
   els.profileTitle.textContent = `${save.player.title} - Lv ${save.player.level}`;
   els.coinReadout.textContent = formatNumber(save.currency.coins);
   els.gemReadout.textContent = formatNumber(save.currency.gems);
