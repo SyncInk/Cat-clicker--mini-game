@@ -6,10 +6,17 @@
     <meta name="description" content="Cat Clicker is a premium desktop-first cat adventure clicker with account-backed progression.">
     <title>Cat Clicker - Premium Desktop Cat Adventure</title>
     <script>
-      if (!localStorage.getItem('catClickerToken')) {
-        window.location.href = '/auth.html';
-      }
+      // Session gate: redirect to auth if no token
+      (function() {
+        var token = localStorage.getItem('catClickerToken');
+        if (!token) {
+          window.location.replace('/auth.html');
+        }
+      })();
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body data-theme="theme-midnight" data-animation="high">
@@ -27,8 +34,6 @@
       </div>
     </div>
 
-
-
     <div id="game-shell" class="game-shell" hidden>
       <aside class="sidebar">
         <div class="side-brand">
@@ -39,21 +44,25 @@
           </div>
         </div>
         <nav id="main-nav" class="main-nav" aria-label="Main game views">
-          <button data-view="overview" class="is-active"><span>01</span>Overview</button>
-          <button data-view="cats"><span>02</span>Cats</button>
-          <button data-view="shop"><span>03</span>Shop</button>
-          <button data-view="battle"><span>04</span>Battle</button>
-          <button data-view="achievements"><span>05</span>Badges</button>
-          <button data-view="inventory"><span>06</span>Inventory</button>
-          <button data-view="leaderboard"><span>07</span>Leaderboard</button>
-          <button data-view="settings"><span>08</span>Settings</button>
-          <button data-action="logout" class="danger-action"><span>09</span>Logout</button>
+          <button data-view="overview" class="is-active"><span class="nav-icon">🏠</span>Overview</button>
+          <button data-view="cats"><span class="nav-icon">🐱</span>Cats</button>
+          <button data-view="shop"><span class="nav-icon">🛒</span>Shop</button>
+          <button data-view="battle"><span class="nav-icon">⚔️</span>Battle</button>
+          <button data-view="achievements"><span class="nav-icon">🏆</span>Badges</button>
+          <button data-view="inventory"><span class="nav-icon">📦</span>Inventory</button>
+          <button data-view="leaderboard"><span class="nav-icon">📊</span>Leaderboard</button>
+          <button data-view="settings"><span class="nav-icon">⚙️</span>Settings</button>
         </nav>
-        <div class="desktop-card">
-          <strong>Desktop-first</strong>
-          <span>Best at 1180px+ with mouse, keyboard, and audio enabled.</span>
-          <kbd>Space</kbd>
-          <small>click featured cat</small>
+        <div class="sidebar-bottom">
+          <div class="desktop-card">
+            <strong>Desktop-first</strong>
+            <span>Best at 1180px+ with mouse, keyboard, and audio enabled.</span>
+            <kbd>Space</kbd>
+            <small>click featured cat</small>
+          </div>
+          <button id="logout-btn" class="logout-btn" data-action="logout">
+            <span class="nav-icon">🚪</span> Sign Out
+          </button>
         </div>
       </aside>
 
@@ -67,8 +76,8 @@
             </div>
           </div>
           <div class="hud-strip">
-            <div class="hud-item"><span>Coins</span><strong id="coin-readout">0</strong></div>
-            <div class="hud-item"><span>Gems</span><strong id="gem-readout">0</strong></div>
+            <div class="hud-item coins"><span>Coins</span><strong id="coin-readout">0</strong></div>
+            <div class="hud-item gems"><span>Gems</span><strong id="gem-readout">0</strong></div>
             <div class="hud-item"><span>Idle</span><strong id="idle-readout">0/sec</strong></div>
             <div class="hud-item save"><span>Save</span><strong id="save-status">Not loaded</strong></div>
           </div>

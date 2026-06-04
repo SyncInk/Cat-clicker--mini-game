@@ -50,10 +50,8 @@ import {
   fetchLeaderboard,
   fetchSave,
   getToken,
-  login,
   logout,
   restoreHistory,
-  signup,
   writeSave
 } from "./api.js";
 import { AudioDirector } from "./audio.js";
@@ -100,11 +98,23 @@ function cacheElements() {
 }
 
 async function boot() {
-  if (!getToken()) return;
+  const token = getToken();
+  if (!token) {
+    window.location.replace('/auth.html');
+    return;
+  }
   showLoading(true);
   try {
     await loadAccount();
   } catch (error) {
+    console.error('Boot failed:', error);
+    // If auth failed, redirect to login
+    if (error.message && (error.message.includes('401') || error.message.includes('session') || error.message.includes('Invalid'))) {
+      localStorage.removeItem('catClickerToken');
+      localStorage.removeItem('catClickerProfile');
+      window.location.replace('/auth.html');
+      return;
+    }
     showToast(error.message, "danger");
   } finally {
     showLoading(false);
@@ -972,6 +982,7 @@ function renderLeaderboard() {
 }
 
 function renderSettings() {
+  const storedProfile = JSON.parse(localStorage.getItem('catClickerProfile') || '{}');
   return `
     <section class="view-grid settings-grid">
       <div class="panel">
@@ -998,8 +1009,8 @@ function renderSettings() {
       </div>
       <div class="panel account-panel">
         <div class="panel-kicker">Account</div>
-        <h2>${escapeHtml(profile.displayName)}</h2>
-        <p>Signed in as ${escapeHtml(profile.username)}. This prototype stores progress on the backend save database, not in a guest browser slot.</p>
+        <h2>${escapeHtml(storedProfile.displayName || profile?.displayName || 'Player')}</h2>
+        <p>Signed in as ${escapeHtml(storedProfile.email || profile?.username || 'unknown')}. Progress is saved to the cloud.</p>
         <div class="stat-grid">
           ${statCard("Autosaves", save.stats.savesWritten)}
           ${statCard("Created", new Date(save.meta.createdAt).toLocaleDateString())}
