@@ -348,7 +348,7 @@ async function handleApi(req, res, url) {
         return;
       }
       try {
-        const payloadBase64 = credential.split(".")[1];
+        const payloadBase64 = credential.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
         const payloadJson = Buffer.from(payloadBase64, "base64").toString("utf8");
         const payload = JSON.parse(payloadJson);
         const email = normalizeUsername(payload.email);
