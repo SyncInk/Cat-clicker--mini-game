@@ -1,97 +1,1345 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=1280, initial-scale=1">
-    <meta name="description" content="Cat Clicker is a premium desktop-first cat adventure clicker with account-backed progression.">
-    <title>Cat Clicker - Premium Desktop Cat Adventure</title>
-    <script>
-      // Session gate: redirect to auth if no token
-      (function() {
-        var token = localStorage.getItem('catClickerToken');
-        if (!token) {
-          window.location.replace('/auth.html');
-        }
-      })();
-    </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css">
-  </head>
-  <body data-theme="theme-midnight" data-animation="high">
-    <div class="backdrop-pattern" aria-hidden="true"></div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Celestial Cat Clicker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=DM+Sans:opsz,wght@9..40,400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0a0710;
+      --bg-day: #1a2b4c;
+      --bg-afternoon: #361f4b;
+      --bg-night: #0a0710;
+      
+      --accent-purple: #b48cff;
+      --accent-gold: #f5c842;
+      --accent-cyan: #6bffee;
+      --accent-pink: #ff8cda;
+      
+      --panel-bg: rgba(20, 15, 30, 0.65);
+      --panel-border: rgba(180, 140, 255, 0.2);
+      --panel-glow: rgba(180, 140, 255, 0.1);
+      
+      --font-header: 'Cinzel Decorative', cursive;
+      --font-body: 'DM Sans', sans-serif;
+      
+      --z-bg: 1;
+      --z-particles: 5;
+      --z-cat: 10;
+      --z-ui: 20;
+      --z-overlay: 100;
+    }
 
-    <div id="loading-screen" class="loading-screen is-visible" aria-live="polite">
-      <div class="loader-card">
-        <div class="loader-mark">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <strong>Preparing Cat Clicker</strong>
-        <p>Loading account systems, gallery data, battle rules, and audio engine.</p>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: var(--bg-color);
+      color: white;
+      font-family: var(--font-body);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      transition: background-color 5s ease;
+    }
+
+    /* Background & Environment */
+    #environment {
+      position: absolute;
+      inset: 0;
+      z-index: var(--z-bg);
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 100%, rgba(180, 140, 255, 0.1), transparent 60%);
+      transition: background 5s ease;
+    }
+
+    #star-field {
+      position: absolute;
+      inset: -50px;
+      background-image: 
+        radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
+      background-repeat: repeat;
+      background-size: 200px 200px;
+      opacity: 0.5;
+      animation: parallaxStars 150s linear infinite;
+    }
+
+    .nebula {
+      position: absolute;
+      width: 60vw;
+      height: 60vh;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      animation: driftNebula 40s ease-in-out infinite alternate;
+    }
+    .nebula.one { top: -10%; left: -10%; background: var(--accent-purple); }
+    .nebula.two { bottom: -10%; right: -10%; background: var(--accent-cyan); animation-delay: -20s; }
+    .nebula.three { top: 40%; left: 50%; width: 40vw; background: var(--accent-pink); animation-duration: 60s; opacity: 0.1; }
+
+    @keyframes parallaxStars {
+      from { transform: translateY(0); }
+      to { transform: translateY(-200px); }
+    }
+    @keyframes driftNebula {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, -50px) scale(1.1); }
+    }
+
+    /* Event Banner */
+    #event-banner {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 40px;
+      background: linear-gradient(90deg, rgba(180,140,255,0.2), rgba(245,200,66,0.3), rgba(180,140,255,0.2));
+      border-bottom: 1px solid var(--accent-gold);
+      box-shadow: 0 0 20px rgba(245,200,66,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: var(--z-ui);
+      font-family: var(--font-header);
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+      text-shadow: 0 0 10px rgba(245,200,66,0.5);
+      cursor: pointer;
+      transform: translateY(-100%);
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    #event-banner.active { transform: translateY(0); }
+    #event-banner:hover { background: linear-gradient(90deg, rgba(180,140,255,0.3), rgba(245,200,66,0.4), rgba(180,140,255,0.3)); }
+
+    /* HUD */
+    #hud {
+      position: absolute;
+      top: 60px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      z-index: var(--z-ui);
+      pointer-events: none;
+    }
+
+    .currency-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .currency-pill {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(12px);
+      border-radius: 30px;
+      padding: 8px 24px 8px 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 15px var(--panel-glow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .currency-pill:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(245,200,66,0.3);
+      border-color: rgba(245,200,66,0.5);
+    }
+
+    .currency-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .coin-icon {
+      background: radial-gradient(circle at 30% 30%, #fffde7, #fbc02d);
+      box-shadow: inset 0 -4px 8px rgba(245,127,23,0.8), 0 0 15px rgba(245,200,66,0.6);
+      color: #f57f17;
+      animation: spinCoin 4s linear infinite;
+    }
+    .gem-icon {
+      background: radial-gradient(circle at 30% 30%, #e0f7fa, #00bcd4);
+      box-shadow: inset 0 -4px 8px rgba(0,96,100,0.8), 0 0 15px rgba(107,255,238,0.6);
+      color: #fff;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      animation: pulseGem 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes spinCoin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+    @keyframes pulseGem { 0% { filter: drop-shadow(0 0 5px var(--accent-cyan)) brightness(1); } 100% { filter: drop-shadow(0 0 15px var(--accent-cyan)) brightness(1.3); } }
+
+    .currency-value {
+      font-family: var(--font-header);
+      font-size: 28px;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      min-width: 120px;
+    }
+
+    .currency-pill.gems .currency-value { color: var(--accent-cyan); font-size: 22px; }
+
+    /* Top Right HUD */
+    .tr-hud {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+      pointer-events: auto;
+    }
+    
+    .status-badge {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(12px);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-purple);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .status-badge:hover { background: rgba(180, 140, 255, 0.2); }
+    .status-badge.streak { color: #ff5722; border-color: rgba(255,87,34,0.3); }
+    .status-badge.prestige { color: var(--accent-pink); border-color: rgba(255,140,218,0.3); }
+    .status-badge.mood { color: var(--accent-cyan); }
+
+    /* Main Stage */
+    #main-stage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: var(--z-cat);
+      cursor: pointer;
+    }
+
+    .pedestal {
+      width: 250px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(180, 140, 255, 0.4) 0%, transparent 70%);
+      box-shadow: 0 0 40px rgba(180, 140, 255, 0.2);
+      transform: scaleY(0.5) translateY(100px);
+      position: absolute;
+      bottom: 60px;
+      transition: all 1s ease;
+    }
+
+    /* Cat SVG Container */
+    #cat-container {
+      position: relative;
+      width: 300px;
+      height: 350px;
+      z-index: 2;
+      filter: drop-shadow(0 0 20px rgba(180,140,255,0.4));
+      transition: filter 0.5s, transform 0.1s;
+      animation: catBreathe 4s ease-in-out infinite;
+    }
+    #cat-container:active { transform: scale(0.95); }
+
+    @keyframes catBreathe {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(1.02) scaleX(0.98); }
+    }
+
+    /* Particles & Floating Text */
+    #particle-layer {
+      position: absolute;
+      inset: 0;
+      z-index: var(--z-particles);
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .floating-text {
+      position: absolute;
+      font-family: var(--font-header);
+      font-weight: 900;
+      font-size: 24px;
+      color: var(--accent-gold);
+      text-shadow: 0 0 10px rgba(245,200,66,0.8), 2px 2px 0 #000;
+      pointer-events: none;
+      animation: floatUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      z-index: calc(var(--z-cat) + 1);
+    }
+    .floating-text.crit { color: var(--accent-pink); font-size: 32px; text-shadow: 0 0 15px var(--accent-pink), 2px 2px 0 #000; }
+    
+    .click-particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-gold);
+      box-shadow: 0 0 10px var(--accent-gold);
+      pointer-events: none;
+      animation: particleArc 0.8s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(0.5); opacity: 0; }
+      20% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+      100% { transform: translateY(-100px) scale(1); opacity: 0; }
+    }
+    @keyframes particleArc {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+
+    /* Frenzy Overlay */
+    #frenzy-overlay {
+      position: absolute;
+      inset: 0;
+      box-shadow: inset 0 0 150px rgba(255, 0, 0, 0);
+      pointer-events: none;
+      z-index: var(--z-overlay);
+      transition: box-shadow 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #frenzy-overlay.active {
+      box-shadow: inset 0 0 150px rgba(255, 80, 80, 0.6);
+      animation: frenzyPulse 0.5s infinite alternate;
+    }
+    #frenzy-text {
+      font-family: var(--font-header);
+      font-size: 80px;
+      color: var(--accent-gold);
+      text-shadow: 0 0 40px rgba(255,0,0,0.8), 0 0 20px var(--accent-gold);
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    #frenzy-overlay.active #frenzy-text { opacity: 1; transform: scale(1); }
+    @keyframes frenzyPulse { 0% { box-shadow: inset 0 0 100px rgba(255,80,80,0.4); } 100% { box-shadow: inset 0 0 200px rgba(255,80,80,0.8); } }
+
+    /* UI Panels (Drawer / Modal) */
+    .ui-panel {
+      position: absolute;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px var(--panel-glow);
+      padding: 24px;
+      z-index: var(--z-overlay);
+      color: white;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .ui-panel.active { opacity: 1; pointer-events: auto; }
+
+    .modal-center {
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      width: 400px;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-center.active { transform: translate(-50%, -50%) scale(1); }
+
+    .drawer-right {
+      top: 20px; right: 20px; bottom: 20px;
+      width: 350px;
+      transform: translateX(400px);
+      overflow-y: auto;
+    }
+    .drawer-right.active { transform: translateX(0); }
+
+    .drawer-left {
+      top: 20px; left: 20px; bottom: 20px;
+      width: 350px;
+      transform: translateX(-400px);
+      overflow-y: auto;
+    }
+    .drawer-left.active { transform: translateX(0); }
+
+    /* Buttons */
+    .btn {
+      background: linear-gradient(135deg, var(--accent-purple), #8a4fff);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(180,140,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(180,140,255,0.5);
+      border-color: rgba(255,255,255,0.4);
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-gold { background: linear-gradient(135deg, var(--accent-gold), #f57f17); color: #4e342e; box-shadow: 0 4px 15px rgba(245,200,66,0.3); }
+    .btn-cyan { background: linear-gradient(135deg, var(--accent-cyan), #00bcd4); color: #004d40; box-shadow: 0 4px 15px rgba(107,255,238,0.3); }
+    .btn-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; transition: background 0.2s; }
+    .btn-close:hover { background: rgba(255,255,255,0.2); }
+
+    /* Navigation / Menu */
+    #nav-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 16px;
+      z-index: var(--z-ui);
+    }
+    .nav-btn {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(12px);
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .nav-btn span { font-size: 24px; margin-bottom: 2px; }
+    .nav-btn small { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #a0aec0; }
+    .nav-btn:hover, .nav-btn.active {
+      transform: translateY(-5px);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 8px 20px rgba(107,255,238,0.3);
+      color: white;
+    }
+    .nav-btn:hover small, .nav-btn.active small { color: var(--accent-cyan); }
+
+    /* Panel Typography & Elements */
+    .panel-title {
+      font-family: var(--font-header);
+      font-size: 24px;
+      color: var(--accent-gold);
+      margin-bottom: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 12px;
+    }
+    
+    /* Preloader */
+    #preloader {
+      position: fixed; inset: 0; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s;
+    }
+    .loader-orb { width: 50px; height: 50px; border-radius: 50%; background: var(--accent-purple); box-shadow: 0 0 30px var(--accent-purple); animation: pulseOrb 1s infinite alternate; }
+    @keyframes pulseOrb { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(1.2); opacity: 1; } }
+
+    /* Season Pass Track */
+    .season-track { display: flex; overflow-x: auto; gap: 12px; padding: 10px 0; scrollbar-width: thin; scrollbar-color: var(--accent-purple) transparent; }
+    .season-node { min-width: 80px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; align-items: center; padding: 12px 8px; position: relative; opacity: 0.7; }
+    .season-node.unlocked { opacity: 1; border-color: var(--accent-gold); background: rgba(245,200,66,0.1); box-shadow: 0 0 10px rgba(245,200,66,0.2); }
+    .season-node .lvl { font-family: var(--font-header); font-size: 12px; color: var(--accent-gold); margin-bottom: 8px; }
+    .season-node .icon { font-size: 24px; }
+    .season-node.locked::after { content: '🔒'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); border-radius: 12px; font-size: 20px; }
+
+    /* List Rows */
+    .list-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 8px; border: 1px solid transparent; transition: background 0.2s; }
+    .list-row:hover { background: rgba(255,255,255,0.08); }
+    .list-row.highlight { border-color: var(--accent-purple); background: rgba(180,140,255,0.1); }
+    .rank-badge { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; background: rgba(0,0,0,0.5); }
+    .rank-1 { background: linear-gradient(135deg, #fbc02d, #f57f17); color: #fff; box-shadow: 0 0 10px rgba(245,200,66,0.5); }
+    .rank-2 { background: linear-gradient(135deg, #e0e0e0, #9e9e9e); color: #fff; }
+    .rank-3 { background: linear-gradient(135deg, #ffb300, #ff8f00); color: #fff; }
+
+    /* Evolution Cutscene */
+    #evolution-cutscene {
+      position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 1s;
+    }
+    #evolution-cutscene.active { opacity: 1; pointer-events: auto; }
+    #evo-title { font-family: var(--font-header); font-size: 48px; color: white; margin-bottom: 40px; letter-spacing: 4px; text-shadow: 0 0 20px rgba(255,255,255,0.5); transform: translateY(-50px); opacity: 0; transition: all 1s 0.5s; }
+    #evolution-cutscene.active #evo-title { transform: translateY(0); opacity: 1; }
+    
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      .drawer-right, .drawer-left {
+        top: auto; left: 0; right: 0; bottom: 0; width: 100%; height: 70vh; border-radius: 30px 30px 0 0;
+        transform: translateY(100%);
+      }
+      .drawer-right.active, .drawer-left.active { transform: translateY(0); }
+      #hud { top: 40px; left: 10px; right: 10px; }
+      .currency-pill { padding: 6px 16px 6px 6px; gap: 8px; }
+      .currency-value { font-size: 20px; min-width: 80px; }
+      .currency-icon { width: 32px; height: 32px; font-size: 16px; }
+      #main-stage { transform: translate(-50%, -60%) scale(0.8); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Check Script -->
+  <script>
+    (function() {
+      if (!localStorage.getItem('catClickerToken')) {
+        window.location.replace('/auth.html');
+      }
+    })();
+  </script>
+
+  <!-- Preloader -->
+  <div id="preloader">
+    <div class="loader-orb"></div>
+    <div style="margin-top:20px; font-family:'Cinzel Decorative'; color:var(--accent-purple); letter-spacing:3px;">AWAKENING...</div>
+  </div>
+
+  <!-- Background Environment -->
+  <div id="environment">
+    <div id="star-field"></div>
+    <div class="nebula one"></div>
+    <div class="nebula two"></div>
+    <div class="nebula three"></div>
+  </div>
+
+  <!-- Frenzy Overlay -->
+  <div id="frenzy-overlay">
+    <div id="frenzy-text">FRENZY! 5X</div>
+  </div>
+
+  <!-- Event Banner -->
+  <div id="event-banner">
+    🌙 Moonlight Festival — Earn 2x coins this weekend!
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="currency-container">
+      <div class="currency-pill">
+        <div class="currency-icon coin-icon">C</div>
+        <div class="currency-value" id="hud-coins">0</div>
+      </div>
+      <div class="currency-pill gems">
+        <div class="currency-icon gem-icon">G</div>
+        <div class="currency-value" id="hud-gems">0</div>
       </div>
     </div>
+    
+    <div class="tr-hud">
+      <div class="status-badge streak" id="badge-streak" title="Daily Login Streak">🔥 Day 1</div>
+      <div class="status-badge mood" id="badge-mood" title="Cat Mood">😸 Happy (+25%)</div>
+      <div class="status-badge prestige" id="badge-prestige" style="display:none;" title="Prestige Multiplier">✨ 1x</div>
+      <div style="color:var(--panel-border); font-size:10px; margin-top:4px;" id="save-status">Syncing...</div>
+    </div>
+  </div>
 
-    <div id="game-shell" class="game-shell" hidden>
-      <aside class="sidebar">
-        <div class="side-brand">
-          <span class="brand-sigil">CC</span>
-          <div>
-            <strong>Cat Clicker</strong>
-            <small>Desktop adventure</small>
-          </div>
-        </div>
-        <nav id="main-nav" class="main-nav" aria-label="Main game views">
-          <button data-view="overview" class="is-active"><span class="nav-icon">🏠</span>Overview</button>
-          <button data-view="cats"><span class="nav-icon">🐱</span>Cats</button>
-          <button data-view="shop"><span class="nav-icon">🛒</span>Shop</button>
-          <button data-view="battle"><span class="nav-icon">⚔️</span>Battle</button>
-          <button data-view="achievements"><span class="nav-icon">🏆</span>Badges</button>
-          <button data-view="inventory"><span class="nav-icon">📦</span>Inventory</button>
-          <button data-view="leaderboard"><span class="nav-icon">📊</span>Leaderboard</button>
-          <button data-view="settings"><span class="nav-icon">⚙️</span>Settings</button>
-        </nav>
-        <div class="sidebar-bottom">
-          <div class="desktop-card">
-            <strong>Desktop-first</strong>
-            <span>Best at 1180px+ with mouse, keyboard, and audio enabled.</span>
-            <kbd>Space</kbd>
-            <small>click featured cat</small>
-          </div>
-          <button id="logout-btn" class="logout-btn" data-action="logout">
-            <span class="nav-icon">🚪</span> Sign Out
-          </button>
-        </div>
-      </aside>
+  <!-- Particle Layer -->
+  <div id="particle-layer"></div>
 
-      <section class="play-space">
-        <header class="topbar">
-          <div class="player-pill">
-            <span class="avatar-dot"></span>
-            <div>
-              <strong id="profile-name">Cat Captain</strong>
-              <small id="profile-title">Rookie Whisker - Lv 1</small>
-            </div>
-          </div>
-          <div class="hud-strip">
-            <div class="hud-item coins"><span>Coins</span><strong id="coin-readout">0</strong></div>
-            <div class="hud-item gems"><span>Gems</span><strong id="gem-readout">0</strong></div>
-            <div class="hud-item"><span>Idle</span><strong id="idle-readout">0/sec</strong></div>
-            <div class="hud-item save"><span>Save</span><strong id="save-status">Not loaded</strong></div>
-          </div>
-        </header>
-        <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
-        <div id="view-root" class="view-root"></div>
-      </section>
+  <!-- Main Stage -->
+  <div id="main-stage">
+    <div class="pedestal" id="cat-pedestal"></div>
+    <!-- The Cat SVG Container -->
+    <div id="cat-container">
+      <!-- Will be populated by JS based on tier -->
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <div id="nav-bar">
+    <button class="nav-btn" onclick="ui.togglePanel('upgrades-panel')"><span>⬆️</span><small>Upgrades</small></button>
+    <button class="nav-btn" onclick="ui.togglePanel('season-panel')"><span>🎟️</span><small>Season</small></button>
+    <button class="nav-btn" onclick="ui.togglePanel('leaderboard-panel')"><span>🏆</span><small>Rank</small></button>
+    <button class="nav-btn" onclick="ui.togglePanel('settings-panel')"><span>⚙️</span><small>Settings</small></button>
+  </div>
+
+  <!-- Panels -->
+  <!-- Upgrades Panel (Left Drawer) -->
+  <div id="upgrades-panel" class="ui-panel drawer-left">
+    <button class="btn-close" onclick="ui.closePanel('upgrades-panel')">✕</button>
+    <h2 class="panel-title">Cat Upgrades</h2>
+    <div id="upgrades-list">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- Season Pass Panel (Center Modal) -->
+  <div id="season-panel" class="ui-panel modal-center">
+    <button class="btn-close" onclick="ui.closePanel('season-panel')">✕</button>
+    <h2 class="panel-title">Cosmic Season Pass</h2>
+    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:12px; color:var(--accent-purple);">
+      <span>XP: <strong id="season-xp">0 / 1000</strong></span>
+      <span>Tier: <strong id="season-tier">1</strong></span>
+    </div>
+    <div style="background:rgba(255,255,255,0.1); height:8px; border-radius:4px; margin-bottom:20px; overflow:hidden;">
+      <div id="season-progress" style="background:var(--accent-cyan); width:0%; height:100%; transition:width 0.3s;"></div>
+    </div>
+    <div class="season-track" id="season-track-free">
+      <!-- Populated by JS -->
+    </div>
+    <button class="btn btn-gold" style="width:100%; margin-top:20px;" onclick="alert('Premium pass coming soon!')">Unlock Premium Pass 🔒</button>
+  </div>
+
+  <!-- Leaderboard Panel (Right Drawer) -->
+  <div id="leaderboard-panel" class="ui-panel drawer-right">
+    <button class="btn-close" onclick="ui.closePanel('leaderboard-panel')">✕</button>
+    <h2 class="panel-title">Galactic Ranks</h2>
+    <div style="text-align:center; font-size:12px; color:var(--muted); margin-bottom:16px;">Top players across the cosmos</div>
+    <div id="leaderboard-list">
+      <!-- Populated by JS -->
+      <div style="text-align:center; padding:20px;"><div class="loader-orb" style="width:20px;height:20px;margin:auto;"></div></div>
+    </div>
+  </div>
+
+  <!-- Settings Panel (Center Modal) -->
+  <div id="settings-panel" class="ui-panel modal-center">
+    <button class="btn-close" onclick="ui.closePanel('settings-panel')">✕</button>
+    <h2 class="panel-title">Settings</h2>
+    
+    <div class="list-row">
+      <div>
+        <div style="font-weight:700;">Music</div>
+        <div style="font-size:11px; color:var(--muted);">Ambient celestial loops</div>
+      </div>
+      <button class="btn" id="btn-toggle-music" onclick="audio.toggleMusic()">ON</button>
+    </div>
+    
+    <div class="list-row">
+      <div>
+        <div style="font-weight:700;">Sound Effects</div>
+        <div style="font-size:11px; color:var(--muted);">Clicks, chimes, explosions</div>
+      </div>
+      <button class="btn" id="btn-toggle-sfx" onclick="audio.toggleSfx()">ON</button>
+    </div>
+    
+    <div class="list-row">
+      <div>
+        <div style="font-weight:700;">Visual Quality</div>
+        <div style="font-size:11px; color:var(--muted);">Particles & background effects</div>
+      </div>
+      <button class="btn btn-cyan" id="btn-toggle-fx" onclick="ui.toggleFx()">HIGH</button>
     </div>
 
-    <aside class="screen-warning">
-      <strong>Cat Clicker is desktop-only.</strong>
-      <span>Open this game on a larger display for the intended layout, animation, audio, and battle UI.</span>
-    </aside>
+    <div style="margin-top:24px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column; gap:12px;">
+      <button class="btn btn-gold" id="btn-prestige" onclick="game.prestige()" style="display:none; justify-content:center;">✨ PRESTIGE (Reset & Multiply)</button>
+      <button class="btn" onclick="game.logout()" style="background:rgba(255,255,255,0.1); justify-content:center;">Sign Out</button>
+      <button class="btn btn-danger" onclick="game.hardReset()" style="background:var(--accent-pink); justify-content:center;">Hard Reset Save</button>
+    </div>
+  </div>
 
-    <script type="module" src="/js/app.js"></script>
-  </body>
+  <!-- Offline / Login Modal -->
+  <div id="welcome-modal" class="ui-panel modal-center">
+    <h2 class="panel-title" id="welcome-title">Welcome Back!</h2>
+    <div style="text-align:center; margin-bottom:20px;">
+      <div style="font-size:60px; margin-bottom:10px;">😴</div>
+      <p style="color:var(--muted); line-height:1.5;">Your cats were busy while you were away.<br>They harvested some cosmic energy for you!</p>
+    </div>
+    <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:16px; margin-bottom:24px; display:flex; justify-content:space-around;">
+      <div style="text-align:center;">
+        <div style="font-size:12px; color:var(--muted); text-transform:uppercase;">Coins Earned</div>
+        <div style="font-family:var(--font-header); font-size:24px; color:var(--accent-gold); font-weight:900;" id="offline-coins">+0</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:12px; color:var(--muted); text-transform:uppercase;">Time Away</div>
+        <div style="font-family:var(--font-header); font-size:24px; color:var(--accent-cyan); font-weight:900;" id="offline-time">0h 0m</div>
+      </div>
+    </div>
+    <button class="btn btn-cyan" style="width:100%; justify-content:center;" onclick="ui.closePanel('welcome-modal')">Awesome!</button>
+  </div>
+
+  <!-- Evolution Cutscene -->
+  <div id="evolution-cutscene">
+    <div id="evo-title">EVOLUTION COMPLETE</div>
+    <div id="evo-cat-preview" style="width:300px; height:300px; filter:drop-shadow(0 0 50px white); margin-bottom:40px;"></div>
+    <button class="btn btn-gold" onclick="ui.endEvolution()">Continue Journey</button>
+  </div>
+<script>
+/**
+ * CELESTIAL CAT CLICKER - MONOLITHIC LOGIC
+ */
+
+// --- 1. CORE API & CONFIG ---
+const API = {
+  getToken: () => localStorage.getItem('catClickerToken'),
+  headers: () => ({
+    'Authorization': 'Bearer ' + localStorage.getItem('catClickerToken'),
+    'Content-Type': 'application/json'
+  }),
+  async save(gameState, reason = 'autosave') {
+    if (!this.getToken()) return;
+    try {
+      await fetch('/api/save', { method: 'POST', headers: this.headers(), body: JSON.stringify({ save: gameState, reason }) });
+    } catch(e) { console.error('Save failed', e); }
+  },
+  async load() {
+    const res = await fetch('/api/save', { headers: this.headers() });
+    if (!res.ok) {
+      if (res.status === 401) { localStorage.removeItem('catClickerToken'); window.location.replace('/auth.html'); }
+      throw new Error('Failed to load save');
+    }
+    return res.json();
+  },
+  async leaderboard() {
+    const res = await fetch('/api/leaderboard', { headers: this.headers() });
+    return res.ok ? res.json() : { leaderboard: [] };
+  },
+  async logout() {
+    await fetch('/api/logout', { method: 'POST', headers: this.headers() });
+    localStorage.removeItem('catClickerToken');
+    window.location.replace('/auth.html');
+  }
+};
+
+// --- 2. AUDIO ENGINE (Web Audio API) ---
+const audio = {
+  ctx: null,
+  musicTimer: null,
+  musicStep: 0,
+  settings: { music: true, sfx: true },
+  
+  init() {
+    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  toggleMusic() {
+    this.settings.music = !this.settings.music;
+    document.getElementById('btn-toggle-music').textContent = this.settings.music ? 'ON' : 'OFF';
+    if (!this.settings.music) { clearInterval(this.musicTimer); this.musicTimer = null; }
+    else this.startMusic();
+    game.saveSettings();
+  },
+  toggleSfx() {
+    this.settings.sfx = !this.settings.sfx;
+    document.getElementById('btn-toggle-sfx').textContent = this.settings.sfx ? 'ON' : 'OFF';
+    game.saveSettings();
+  },
+  tone(freq, type='sine', dur=0.1, vol=0.1, bend=0) {
+    if (!this.settings.sfx) return;
+    this.init();
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    if (bend) osc.frequency.exponentialRampToValueAtTime(Math.max(40, freq+bend), t+dur);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.start(t); osc.stop(t+dur+0.1);
+  },
+  noise(dur=0.1, vol=0.05) {
+    if (!this.settings.sfx) return;
+    this.init();
+    const t = this.ctx.currentTime;
+    const buf = this.ctx.createBuffer(1, this.ctx.sampleRate * dur, this.ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i=0; i<data.length; i++) data[i] = (Math.random()*2-1) * (1 - i/data.length);
+    const src = this.ctx.createBufferSource();
+    const gain = this.ctx.createGain();
+    src.buffer = buf;
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t+dur);
+    src.connect(gain); gain.connect(this.ctx.destination);
+    src.start(t);
+  },
+  click(isCrit, isFrenzy) {
+    let freq = isFrenzy ? 1200 : 800;
+    let vol = isFrenzy ? 0.15 : 0.1;
+    if (isCrit) {
+      this.tone(freq*1.5, 'square', 0.1, vol, 400);
+      this.noise(0.05, 0.05);
+    } else {
+      this.tone(freq, 'sine', 0.05, vol, 100);
+    }
+  },
+  buy() {
+    this.tone(1200, 'triangle', 0.1, 0.1);
+    setTimeout(() => this.tone(1600, 'sine', 0.2, 0.1), 50);
+  },
+  fanfare() {
+    [440, 554, 659, 880].forEach((f, i) => setTimeout(() => this.tone(f, 'square', 0.3, 0.1), i*100));
+  },
+  frenzyStart() {
+    this.noise(0.5, 0.1);
+    [400,600,800,1000,1200].forEach((f, i) => setTimeout(() => this.tone(f, 'sawtooth', 0.1, 0.1), i*50));
+  },
+  startMusic() {
+    if (!this.settings.music || this.musicTimer) return;
+    this.init();
+    const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; // C Major Pentatonic
+    this.musicTimer = setInterval(() => {
+      if (!this.settings.music) return;
+      const root = scale[this.musicStep % scale.length];
+      const speed = game.frenzyActive ? 0.2 : 0.5;
+      const freqMultiplier = game.frenzyActive ? 1.5 : 1;
+      this.tone(root * freqMultiplier, 'sine', speed*0.8, 0.02);
+      if (this.musicStep % 4 === 0) this.tone((root/2) * freqMultiplier, 'triangle', speed*1.5, 0.03);
+      this.musicStep++;
+    }, game.frenzyActive ? 150 : 600);
+  },
+  updateMusicSpeed() {
+    if (this.musicTimer) {
+      clearInterval(this.musicTimer);
+      this.musicTimer = null;
+      this.startMusic();
+    }
+  }
+};
+
+// --- 3. SVG CAT RENDERER ---
+const svgAssets = {
+  tier1: `<svg viewBox="0 0 100 100" width="100%" height="100%"><ellipse cx="50" cy="65" rx="35" ry="30" fill="#f57f17"/><polygon points="20,40 30,10 45,35" fill="#f57f17"/><polygon points="80,40 70,10 55,35" fill="#f57f17"/><circle cx="35" cy="55" r="5" fill="#000"/><circle cx="65" cy="55" r="5" fill="#000"/><path d="M 45 65 Q 50 70 55 65" fill="none" stroke="#000" stroke-width="2"/><path d="M 80 70 Q 95 60 90 45" fill="none" stroke="#f57f17" stroke-width="6" stroke-linecap="round" class="tail"/></svg>`,
+  tier2: `<svg viewBox="0 0 100 100" width="100%" height="100%"><ellipse cx="50" cy="60" rx="30" ry="35" fill="#212121"/><polygon points="25,35 20,5 40,25" fill="#212121"/><polygon points="75,35 80,5 60,25" fill="#212121"/><circle cx="35" cy="50" r="6" fill="#b48cff"/><circle cx="65" cy="50" r="6" fill="#b48cff"/><path d="M 45 60 Q 50 65 55 60" fill="none" stroke="#b48cff" stroke-width="2"/><path d="M 75 80 Q 95 80 90 50" fill="none" stroke="#212121" stroke-width="5" stroke-linecap="round" class="tail"/></svg>`,
+  tier3: `<svg viewBox="0 0 100 100" width="100%" height="100%"><defs><radialGradient id="gGold" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff59d"/><stop offset="100%" stop-color="#fbc02d"/></radialGradient></defs><ellipse cx="50" cy="55" rx="28" ry="40" fill="url(#gGold)"/><polygon points="25,30 15,0 40,20" fill="url(#gGold)"/><polygon points="75,30 85,0 60,20" fill="url(#gGold)"/><circle cx="35" cy="45" r="7" fill="#fff"/><circle cx="65" cy="45" r="7" fill="#fff"/><path d="M 45 55 Q 50 60 55 55" fill="none" stroke="#fff" stroke-width="2"/><path d="M 70 85 Q 100 90 95 40" fill="none" stroke="url(#gGold)" stroke-width="6" stroke-linecap="round" class="tail"/></svg>`,
+  tier4: `<svg viewBox="0 0 100 100" width="100%" height="100%"><defs><linearGradient id="gCosmic" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b48cff"/><stop offset="50%" stop-color="#6bffee"/><stop offset="100%" stop-color="#ff8cda"/></linearGradient></defs><path d="M 50 90 C 20 90 10 50 25 30 C 15 10 35 15 40 25 C 50 20 60 20 70 25 C 75 15 95 10 85 30 C 100 50 80 90 50 90 Z" fill="url(#gCosmic)"/><circle cx="35" cy="45" r="8" fill="#fff" filter="blur(1px)"/><circle cx="65" cy="45" r="8" fill="#fff" filter="blur(1px)"/><path d="M 10 50 Q -10 30 10 10" fill="none" stroke="url(#gCosmic)" stroke-width="3" opacity="0.6"/><path d="M 90 50 Q 110 30 90 10" fill="none" stroke="url(#gCosmic)" stroke-width="3" opacity="0.6"/><path d="M 70 80 Q 110 100 100 30" fill="none" stroke="url(#gCosmic)" stroke-width="4" stroke-linecap="round" class="tail"/></svg>`
+};
+
+// --- 4. GAME STATE & LOGIC ---
+const game = {
+  state: {
+    coins: 0,
+    gems: 0,
+    totalCoins: 0,
+    clickPower: 1,
+    passiveIncome: 0,
+    prestigeMultiplier: 1,
+    tier: 1,
+    streak: 1,
+    lastLogin: Date.now(),
+    lastSave: Date.now(),
+    mood: 100, // 0 to 100
+    xp: 0,
+    upgrades: {} // id: count
+  },
+  visualCoins: 0,
+  visualGems: 0,
+  clickTimes: [], // For frenzy detection
+  frenzyActive: false,
+  frenzyTimer: 0,
+  
+  // Upgrades config
+  shop: [
+    { id: 'mouse', name: 'Clockwork Mouse', baseCost: 50, cps: 1, icon: '🐁' },
+    { id: 'yarn', name: 'Magic Yarn', baseCost: 250, cps: 5, icon: '🧶' },
+    { id: 'nip', name: 'Cosmic Catnip', baseCost: 1000, cps: 25, icon: '🌿' },
+    { id: 'tree', name: 'Stellar Cat Tree', baseCost: 5000, cps: 100, icon: '🌳' },
+    { id: 'click1', name: 'Sharpen Claws', baseCost: 100, click: 1, icon: '🐾' },
+    { id: 'click2', name: 'Laser Pointer', baseCost: 1500, click: 10, icon: '🔴' }
+  ],
+
+  init(savedData) {
+    if (savedData?.player) {
+      // Map old state to new
+      this.state.coins = savedData.currency?.coins || 0;
+      this.state.gems = savedData.currency?.gems || 0;
+      this.state.totalCoins = savedData.stats?.totalCoinsEarned || this.state.coins;
+      this.state.upgrades = savedData.upgrades || {};
+      this.state.prestigeMultiplier = savedData.stats?.prestige || 1;
+      this.state.streak = savedData.stats?.streak || 1;
+      this.state.lastLogin = savedData.meta?.lastSavedAt ? Date.parse(savedData.meta.lastSavedAt) : Date.now();
+      this.state.xp = savedData.stats?.xp || 0;
+      this.state.mood = savedData.stats?.mood ?? 100;
+      this.state.trait = savedData.stats?.trait || null;
+    }
+    
+    if (!this.state.trait) {
+      const traits = ['Lazy', 'Greedy', 'Lucky', 'Mystic', 'Fierce'];
+      this.state.trait = traits[Math.floor(Math.random() * traits.length)];
+    }
+    
+    this.visualCoins = this.state.coins;
+    this.visualGems = this.state.gems;
+    this.recalculateStats();
+    this.checkEvolution();
+    this.processOffline();
+    
+    // Bind clicks
+    document.getElementById('main-stage').addEventListener('pointerdown', (e) => this.clickCat(e));
+    
+    // Start loops
+    requestAnimationFrame((t) => this.loop(t));
+    setInterval(() => this.tick(), 1000);
+    setInterval(() => this.autoSave(), 30000);
+    
+    ui.renderCat();
+    ui.renderShop();
+    ui.renderSeason();
+    ui.updateHud();
+  },
+
+  recalculateStats() {
+    let passive = 0;
+    let click = 1;
+    this.shop.forEach(item => {
+      const count = this.state.upgrades[item.id] || 0;
+      if (item.cps) passive += count * item.cps;
+      if (item.click) click += count * item.click;
+    });
+    
+    // Multipliers
+    let mult = this.state.prestigeMultiplier;
+    
+    // Mood multiplier
+    if (this.state.mood > 80) mult *= 1.25;
+    else if (this.state.mood < 20) mult *= 0.75;
+    
+    // Trait multiplier
+    if (this.state.trait === 'Greedy') mult *= 1.5;
+    
+    // Day/Night cycle
+    const hour = new Date().getHours();
+    if (hour >= 22 || hour < 6) mult *= 0.9; // Sleepy at night
+    
+    this.state.passiveIncome = passive * mult;
+    this.state.clickPower = click * mult;
+  },
+
+  clickCat(e) {
+    const now = Date.now();
+    this.clickTimes = this.clickTimes.filter(t => now - t < 2000);
+    this.clickTimes.push(now);
+    
+    // Check frenzy
+    if (this.clickTimes.length >= 10 && !this.frenzyActive) {
+      this.triggerFrenzy();
+    }
+    
+    const isCrit = Math.random() < 0.1;
+    let amount = this.state.clickPower * (isCrit ? 3 : 1);
+    
+    if (this.state.trait === 'Mystic' && Math.random() < 0.2) amount *= 2; // Mystic double chance
+    
+    if (this.frenzyActive) amount *= 5;
+    
+    this.state.coins += amount;
+    this.state.totalCoins += amount;
+    this.state.mood = Math.min(100, this.state.mood + 2); // Restore mood
+    this.state.xp += 1;
+    
+    audio.click(isCrit, this.frenzyActive);
+    ui.spawnParticles(e.clientX, e.clientY, amount, isCrit);
+    
+    this.checkEvolution();
+  },
+
+  triggerFrenzy() {
+    this.frenzyActive = true;
+    this.frenzyTimer = this.state.trait === 'Fierce' ? 12 : 8;
+    this.clickTimes = [];
+    audio.frenzyStart();
+    audio.updateMusicSpeed();
+    document.getElementById('frenzy-overlay').classList.add('active');
+  },
+
+  buy(id) {
+    const item = this.shop.find(i => i.id === id);
+    const count = this.state.upgrades[id] || 0;
+    let cost = Math.floor(item.baseCost * Math.pow(1.15, count));
+    if (this.state.trait === 'Greedy') cost = Math.floor(cost * 1.5);
+    
+    if (this.state.coins >= cost) {
+      this.state.coins -= cost;
+      this.state.upgrades[id] = count + 1;
+      this.state.mood = Math.min(100, this.state.mood + 10);
+      this.recalculateStats();
+      ui.renderShop();
+      audio.buy();
+      ui.screenShake();
+    }
+  },
+
+  checkEvolution() {
+    let newTier = 1;
+    if (this.state.totalCoins >= 1000000) newTier = 4;
+    else if (this.state.totalCoins >= 100000) newTier = 3;
+    else if (this.state.totalCoins >= 10000) newTier = 2;
+    
+    if (newTier > this.state.tier) {
+      this.state.tier = newTier;
+      audio.fanfare();
+      ui.showEvolution(newTier);
+    }
+  },
+
+  tick() {
+    // Passive income
+    if (this.state.passiveIncome > 0) {
+      this.state.coins += this.state.passiveIncome;
+      this.state.totalCoins += this.state.passiveIncome;
+    }
+    
+    // Mood decay
+    if (this.state.mood > 0) {
+      this.state.mood = Math.max(0, this.state.mood - 0.5);
+    }
+    
+    // Frenzy timer
+    if (this.frenzyActive) {
+      this.frenzyTimer--;
+      if (this.frenzyTimer <= 0) {
+        this.frenzyActive = false;
+        document.getElementById('frenzy-overlay').classList.remove('active');
+        audio.updateMusicSpeed();
+      }
+    }
+    
+    // Lucky trait burst
+    if (this.state.trait === 'Lucky' && Math.random() < 0.03) { // ~30s on average
+      const burst = this.state.clickPower * 50;
+      this.state.coins += burst;
+      this.state.totalCoins += burst;
+      ui.spawnParticles(window.innerWidth/2, window.innerHeight/2, burst, true);
+    }
+    
+    this.recalculateStats();
+    this.checkEvolution();
+  },
+
+  loop(t) {
+    // Smooth currency interpolation
+    if (this.visualCoins < this.state.coins) {
+      this.visualCoins += Math.max(0.1, (this.state.coins - this.visualCoins) * 0.1);
+      if (this.state.coins - this.visualCoins < 0.5) this.visualCoins = this.state.coins;
+    } else if (this.visualCoins > this.state.coins) {
+      this.visualCoins = this.state.coins;
+    }
+    
+    ui.updateHud();
+    ui.updateEnvironment();
+    requestAnimationFrame((time) => this.loop(time));
+  },
+
+  processOffline() {
+    const now = Date.now();
+    const diffHours = (now - this.state.lastLogin) / (1000 * 60 * 60);
+    if (diffHours > 1 && this.state.passiveIncome > 0) {
+      // Max 24 hours offline
+      const effectiveHours = Math.min(24, diffHours);
+      let rate = 0.5;
+      if (this.state.trait === 'Lazy') rate = 1.0; // 2x offline (100% instead of 50%)
+      const earned = Math.floor(effectiveHours * 3600 * this.state.passiveIncome * rate);
+      this.state.coins += earned;
+      this.state.totalCoins += earned;
+      ui.showOfflinePopup(earned, effectiveHours);
+    }
+    
+    // Daily Login Streak logic
+    const daysSince = Math.floor(diffHours / 24);
+    if (daysSince === 1) this.state.streak++;
+    else if (daysSince > 1) this.state.streak = 1;
+    
+    this.state.lastLogin = now;
+  },
+
+  prestige() {
+    if (confirm('Sacrifice all coins, cats, and upgrades to gain a permanent x2 multiplier?')) {
+      this.state.prestigeMultiplier *= 2;
+      this.state.coins = 0;
+      this.state.totalCoins = 0;
+      this.state.upgrades = {};
+      this.state.tier = 1;
+      this.state.xp = 0;
+      this.recalculateStats();
+      ui.renderCat();
+      ui.renderShop();
+      ui.closePanel('settings-panel');
+      
+      // Explosion effect
+      const layer = document.getElementById('particle-layer');
+      layer.innerHTML = '';
+      for(let i=0; i<50; i++) {
+        setTimeout(() => ui.spawnParticles(window.innerWidth/2, window.innerHeight/2, 0, true), Math.random()*1000);
+      }
+      audio.fanfare();
+      this.autoSave();
+    }
+  },
+
+  hardReset() {
+    if (confirm('Completely erase all progress? This cannot be undone.')) {
+      this.state = { coins:0, gems:0, totalCoins:0, clickPower:1, passiveIncome:0, prestigeMultiplier:1, tier:1, streak:1, lastLogin:Date.now(), lastSave:Date.now(), mood:100, xp:0, upgrades:{} };
+      this.autoSave();
+      window.location.reload();
+    }
+  },
+
+  autoSave() {
+    document.getElementById('save-status').textContent = 'Saving...';
+    // Format for backend
+    const payload = {
+      meta: { lastSavedAt: new Date().toISOString() },
+      player: { level: Math.floor(this.state.xp/100)+1 },
+      currency: { coins: this.state.coins, gems: this.state.gems },
+      stats: { totalCoinsEarned: this.state.totalCoins, prestige: this.state.prestigeMultiplier, streak: this.state.streak, xp: this.state.xp, mood: this.state.mood, trait: this.state.trait },
+      upgrades: this.state.upgrades
+    };
+    API.save(payload).then(() => {
+      document.getElementById('save-status').textContent = 'Saved just now';
+    });
+  },
+  
+  logout() {
+    this.autoSave();
+    API.logout();
+  }
+};
+
+// --- 5. UI LAYER ---
+const ui = {
+  fxEnabled: true,
+  
+  updateHud() {
+    document.getElementById('hud-coins').textContent = Math.floor(game.visualCoins).toLocaleString();
+    document.getElementById('hud-gems').textContent = Math.floor(game.visualGems).toLocaleString();
+    
+    // Badges
+    document.getElementById('badge-streak').textContent = `🔥 Day ${game.state.streak}`;
+    
+    const moodBadge = document.getElementById('badge-mood');
+    if (game.state.mood > 80) { moodBadge.textContent = '😸 Happy (+25%)'; moodBadge.style.color = 'var(--accent-cyan)'; }
+    else if (game.state.mood < 20) { moodBadge.textContent = '😿 Sad (-25%)'; moodBadge.style.color = 'var(--accent-pink)'; }
+    else { moodBadge.textContent = '🐱 Neutral'; moodBadge.style.color = 'var(--muted)'; }
+    
+    // Trait badge
+    let traitBadge = document.getElementById('badge-trait');
+    if (!traitBadge) {
+      traitBadge = document.createElement('div');
+      traitBadge.className = 'status-badge';
+      traitBadge.id = 'badge-trait';
+      document.querySelector('.tr-hud').insertBefore(traitBadge, document.getElementById('badge-prestige'));
+    }
+    const tColors = { 'Lazy': '#a1887f', 'Greedy': '#ffd54f', 'Lucky': '#81c784', 'Mystic': '#ba68c8', 'Fierce': '#e57373' };
+    traitBadge.textContent = game.state.trait ? `⭐ ${game.state.trait}` : '';
+    traitBadge.style.color = tColors[game.state.trait] || 'white';
+    traitBadge.style.borderColor = tColors[game.state.trait] || 'white';
+    traitBadge.title = 'Cat Personality Trait';
+
+    const presBadge = document.getElementById('badge-prestige');
+    if (game.state.prestigeMultiplier > 1) {
+      presBadge.style.display = 'flex';
+      presBadge.textContent = `✨ ${game.state.prestigeMultiplier}x`;
+    }
+    
+    const presBtn = document.getElementById('btn-prestige');
+    presBtn.style.display = game.state.totalCoins > 10000000 ? 'flex' : 'none';
+  },
+
+  updateEnvironment() {
+    const hour = new Date().getHours();
+    let bgVar = '--bg-night';
+    if (hour >= 6 && hour < 16) bgVar = '--bg-day';
+    else if (hour >= 16 && hour < 20) bgVar = '--bg-afternoon';
+    document.body.style.backgroundColor = `var(${bgVar})`;
+  },
+
+  renderCat() {
+    document.getElementById('cat-container').innerHTML = svgAssets[`tier${game.state.tier}`];
+    const ped = document.getElementById('cat-pedestal');
+    ped.style.background = game.state.tier >= 3 ? 'radial-gradient(ellipse at center, rgba(245,200,66,0.6) 0%, transparent 70%)' : 'radial-gradient(ellipse at center, rgba(180, 140, 255, 0.4) 0%, transparent 70%)';
+  },
+
+  showEvolution(tier) {
+    const cs = document.getElementById('evolution-cutscene');
+    document.getElementById('evo-cat-preview').innerHTML = svgAssets[`tier${tier}`];
+    cs.classList.add('active');
+    this.renderCat();
+  },
+  endEvolution() {
+    document.getElementById('evolution-cutscene').classList.remove('active');
+  },
+
+  renderShop() {
+    const list = document.getElementById('upgrades-list');
+    list.innerHTML = '';
+    game.shop.forEach(item => {
+      const count = game.state.upgrades[item.id] || 0;
+      const cost = Math.floor(item.baseCost * Math.pow(1.15, count));
+      const canAfford = game.state.coins >= cost;
+      
+      const row = document.createElement('div');
+      row.className = 'list-row';
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="font-size:32px; filter:drop-shadow(0 0 5px rgba(255,255,255,0.2));">${item.icon}</div>
+          <div>
+            <div style="font-weight:700;">${item.name} <span style="color:var(--accent-purple); font-size:12px;">Lvl ${count}</span></div>
+            <div style="font-size:11px; color:var(--muted);">${item.cps ? `+${item.cps} coins/sec` : `+${item.click} coins/click`}</div>
+          </div>
+        </div>
+        <button class="btn ${canAfford ? 'btn-gold' : ''}" style="${canAfford ? '' : 'opacity:0.5; filter:grayscale(1);'}" onclick="game.buy('${item.id}')">
+          C ${cost.toLocaleString()}
+        </button>
+      `;
+      list.appendChild(row);
+    });
+  },
+  
+  renderSeason() {
+    document.getElementById('season-xp').textContent = `${game.state.xp} / ${game.state.tier * 1000}`;
+    document.getElementById('season-tier').textContent = game.state.tier;
+    document.getElementById('season-progress').style.width = `${Math.min(100, (game.state.xp / (game.state.tier * 1000)) * 100)}%`;
+    
+    const track = document.getElementById('season-track-free');
+    track.innerHTML = '';
+    for(let i=1; i<=20; i++) {
+      const unlocked = game.state.xp >= i * 100;
+      track.innerHTML += `
+        <div class="season-node ${unlocked ? 'unlocked' : 'locked'}">
+          <div class="lvl">Tier ${i}</div>
+          <div class="icon">${i%5===0 ? '💎' : '🪙'}</div>
+        </div>
+      `;
+    }
+  },
+
+  async fetchLeaderboard() {
+    const data = await API.leaderboard();
+    const list = document.getElementById('leaderboard-list');
+    list.innerHTML = '';
+    if (!data.leaderboard.length) {
+      list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">No data yet</div>';
+      return;
+    }
+    data.leaderboard.forEach((p, i) => {
+      list.innerHTML += `
+        <div class="list-row ${i===0 ? 'highlight' : ''}">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="rank-badge rank-${i+1}">${i+1}</div>
+            <div style="font-weight:700;">${p.displayName || p.username}</div>
+          </div>
+          <div style="font-family:var(--font-header); color:var(--accent-gold);">${(p.score || 0).toLocaleString()}</div>
+        </div>
+      `;
+    });
+  },
+
+  togglePanel(id) {
+    const el = document.getElementById(id);
+    const isActive = el.classList.contains('active');
+    
+    // Close others
+    document.querySelectorAll('.ui-panel').forEach(p => {
+      if (p.id !== 'welcome-modal' && p.id !== 'evolution-cutscene') p.classList.remove('active');
+    });
+    
+    if (!isActive) {
+      el.classList.add('active');
+      if (id === 'leaderboard-panel') this.fetchLeaderboard();
+      if (id === 'season-panel') this.renderSeason();
+      if (id === 'upgrades-panel') this.renderShop();
+    }
+  },
+  
+  closePanel(id) { document.getElementById(id).classList.remove('active'); },
+
+  spawnParticles(x, y, amount, isCrit) {
+    if (!this.fxEnabled) return;
+    const layer = document.getElementById('particle-layer');
+    
+    // Floating Text
+    const txt = document.createElement('div');
+    txt.className = `floating-text ${isCrit ? 'crit' : ''}`;
+    txt.textContent = isCrit ? `CRIT! +${Math.floor(amount)}` : `+${Math.floor(amount)}`;
+    txt.style.left = (x + (Math.random()*40-20)) + 'px';
+    txt.style.top = (y - 30) + 'px';
+    layer.appendChild(txt);
+    setTimeout(() => txt.remove(), 1000);
+    
+    // Coin particles
+    const numParticles = isCrit ? 8 : 3;
+    for(let i=0; i<numParticles; i++) {
+      const p = document.createElement('div');
+      p.className = 'click-particle';
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      p.style.setProperty('--tx', (Math.random()*150 - 75) + 'px');
+      p.style.setProperty('--ty', (Math.random()*-150 - 50) + 'px');
+      layer.appendChild(p);
+      setTimeout(() => p.remove(), 800);
+    }
+  },
+
+  screenShake() {
+    if (!this.fxEnabled) return;
+    const stage = document.getElementById('main-stage');
+    stage.style.transform = `translate(calc(-50% + ${Math.random()*10-5}px), calc(-50% + ${Math.random()*10-5}px))`;
+    setTimeout(() => stage.style.transform = 'translate(-50%, -50%)', 100);
+  },
+
+  toggleFx() {
+    this.fxEnabled = !this.fxEnabled;
+    document.getElementById('btn-toggle-fx').textContent = this.fxEnabled ? 'HIGH' : 'LOW';
+    document.getElementById('environment').style.display = this.fxEnabled ? 'block' : 'none';
+  },
+
+  showOfflinePopup(coins, hours) {
+    const m = document.getElementById('welcome-modal');
+    document.getElementById('offline-coins').textContent = '+' + coins.toLocaleString();
+    document.getElementById('offline-time').textContent = `${Math.floor(hours)}h ${Math.floor((hours%1)*60)}m`;
+    m.classList.add('active');
+  }
+};
+
+// --- 6. BOOTSTRAP ---
+window.addEventListener('beforeunload', () => game.autoSave());
+
+// Random Event Banner logic
+setInterval(() => {
+  const banner = document.getElementById('event-banner');
+  if (Math.random() < 0.3 && !banner.classList.contains('active')) {
+    banner.classList.add('active');
+    setTimeout(() => banner.classList.remove('active'), 20000);
+  }
+}, 60000);
+
+// Start
+window.onload = async () => {
+  try {
+    const data = await API.load();
+    document.getElementById('preloader').style.opacity = '0';
+    setTimeout(() => document.getElementById('preloader').style.display = 'none', 500);
+    
+    // Apply Settings
+    if (data.save?.settings) {
+      audio.settings.music = data.save.settings.music ?? true;
+      audio.settings.sfx = data.save.settings.sound ?? true;
+    }
+    document.getElementById('btn-toggle-music').textContent = audio.settings.music ? 'ON' : 'OFF';
+    document.getElementById('btn-toggle-sfx').textContent = audio.settings.sfx ? 'ON' : 'OFF';
+    if (audio.settings.music) audio.startMusic();
+    
+    game.init(data.save);
+  } catch(e) {
+    console.error("Boot failed", e);
+  }
+};
+</script>
+</body>
 </html>
