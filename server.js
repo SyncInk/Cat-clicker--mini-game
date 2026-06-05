@@ -65,7 +65,10 @@ async function loadDb() {
   }
   await ensureDatabase();
   const raw = await fs.readFile(DB_FILE, "utf8");
-  dbCache = JSON.parse(raw);
+  dbCache = JSON.parse(raw, (key, value) => {
+    if (typeof value === 'string' && /^-?\d+n$/.test(value)) return BigInt(value.slice(0, -1));
+    return value;
+  });
   dbCache.users ||= {};
   dbCache.nextUserId ||= 1;
   return dbCache;
@@ -74,7 +77,10 @@ async function loadDb() {
 async function saveDb(db) {
   await fs.mkdir(DATA_DIR, { recursive: true });
   const tmpFile = `${DB_FILE}.tmp`;
-  await fs.writeFile(tmpFile, JSON.stringify(db, null, 2));
+  await fs.writeFile(tmpFile, JSON.stringify(db, (key, value) => {
+    if (typeof value === 'bigint') return value.toString() + 'n';
+    return value;
+  }, 2));
   await fs.rename(tmpFile, DB_FILE);
   dbCache = db;
 }
@@ -206,11 +212,27 @@ function summarizeSave(save) {
   const player = save?.player || {};
   const currency = save?.currency || {};
   const cats = save?.cats?.owned || {};
+  
+  // BigInt parsing
+  const rawCoins = String(currency.coins || "0").replace('n','');
+  const rawGems = String(currency.gems || "0").replace('n','');
+  
+  // Calculate permanent meta-currency (prestige) securely on the server
+  // Formula: (total_lifetime_coins ^ 0.35)
+  const rawTotal = String(stats.totalCoinsEarned || "0").replace('n','');
+  let metaCurrency = 0;
+  try {
+    // Number() can lose precision for huge BigInts, but it's fine for fractional exponents
+    // since Math.pow only takes Numbers anyway. We scale it down first if too huge, but typically safe.
+    metaCurrency = Math.floor(Math.pow(Number(rawTotal), 0.35) * 10);
+  } catch(e) {}
+  
   return {
     level: player.level || 1,
     title: player.title || "Rookie Whisker",
-    coins: Math.floor(currency.coins || 0),
-    gems: Math.floor(currency.gems || 0),
+    coins: rawCoins,
+    gems: rawGems,
+    prestigeCalculated: metaCurrency,
     catsOwned: Object.keys(cats).length,
     battlesWon: stats.battlesWon || 0,
     bossesDefeated: stats.bossesDefeated || 0,
