@@ -10,28 +10,40 @@
   <style>
     :root {
       --bg-color: #0a0710;
-      --bg-day: #1a2b4c;
-      --bg-afternoon: #361f4b;
-      --bg-night: #0a0710;
-      
-      --accent-purple: #b48cff;
+      --accent: #b48cff; /* Primary variable for UI Color Change */
       --accent-gold: #f5c842;
       --accent-cyan: #6bffee;
       --accent-pink: #ff8cda;
       
-      --panel-bg: rgba(15, 10, 25, 0.7);
-      --panel-border: rgba(180, 140, 255, 0.15);
+      --panel-bg: rgba(15, 10, 25, 0.6);
+      --panel-border: rgba(255, 255, 255, 0.15);
       
       --font-header: 'Cinzel Decorative', cursive;
       --font-body: 'DM Sans', sans-serif;
+      
+      --spacing-lg: 24px;
+      --spacing-md: 16px;
+      --spacing-sm: 8px;
     }
+
+    /* COMPACT MODE OVERRIDES */
+    body.compact-mode {
+      --spacing-lg: 12px;
+      --spacing-md: 8px;
+      --spacing-sm: 4px;
+      font-size: 0.85em;
+    }
+    body.compact-mode .panel-section { padding: 10px; }
+    body.compact-mode .upgrade-item { padding: 8px; gap: 10px; }
+    body.compact-mode #cat-stage { width: 250px; height: 250px; }
+    body.compact-mode .main-currency { font-size: 40px; }
 
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(180,140,255,0.3); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(180,140,255,0.6); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
     body {
       background-color: var(--bg-color);
@@ -40,11 +52,11 @@
       overflow: hidden;
       height: 100vh;
       width: 100vw;
-      transition: background-color 5s ease;
-      display: grid;
-      grid-template-columns: 320px 1fr 380px;
+      display: flex;
+      flex-direction: column;
     }
 
+    /* ── Environment & Particles ───────────────────────── */
     #environment {
       position: absolute; inset: 0; z-index: -1; pointer-events: none;
       background: radial-gradient(circle at 50% 100%, rgba(180, 140, 255, 0.15), transparent 60%);
@@ -60,112 +72,81 @@
     }
     @keyframes parallaxStars { from { transform: translateY(0); } to { transform: translateY(-200px); } }
 
-    .col {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      position: relative;
-      z-index: 10;
+    #particle-canvas {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
     }
 
-    #col-left {
-      background: linear-gradient(to right, rgba(10,7,16,0.95), rgba(10,7,16,0.5));
-      border-right: 1px solid var(--panel-border);
-      backdrop-filter: blur(15px);
-      padding: 20px;
-      gap: 20px;
+    /* Graphic Low Mode Overrides */
+    body.graphic-low #particle-canvas { display: none; }
+    body.graphic-low .glass-panel,
+    body.graphic-low .nav-bar,
+    body.graphic-low .modal-content {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: rgba(15, 10, 25, 0.95);
     }
 
-    #col-right {
-      background: linear-gradient(to left, rgba(10,7,16,0.95), rgba(10,7,16,0.5));
-      border-left: 1px solid var(--panel-border);
-      backdrop-filter: blur(15px);
-      padding: 0;
+    /* ── Navigation Bar ────────────────────────────────── */
+    .nav-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 var(--spacing-lg); height: 64px;
+      background: rgba(10, 7, 16, 0.8); backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--panel-border);
+      z-index: 100;
     }
-
-    #col-center {
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      z-index: 5;
+    .nav-brand { font-family: var(--font-header); font-size: 20px; font-weight: 700; color: var(--accent-gold); display: flex; align-items: center; gap: 10px; }
+    .nav-tabs { display: flex; gap: 4px; height: 100%; }
+    .nav-tab {
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 20px; cursor: pointer; color: var(--muted); font-weight: 600;
+      border-bottom: 3px solid transparent; transition: all 0.2s;
     }
+    .nav-tab:hover { color: white; background: rgba(255,255,255,0.05); }
+    .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(255,255,255,0.02); }
+    
+    .nav-controls { display: flex; gap: 10px; }
 
-    .panel-section {
+    /* ── Top HUD ───────────────────────────────────────── */
+    .top-hud {
+      display: flex; justify-content: center; align-items: center; gap: 30px;
+      padding: var(--spacing-md); z-index: 50; position: relative;
+    }
+    .main-currency {
+      font-family: var(--font-header); font-size: 48px; font-weight: 900;
+      color: white; text-shadow: 0 4px 20px rgba(245,200,66,0.5), 2px 4px 0 #000;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .gem-currency { font-family: var(--font-header); font-size: 24px; color: var(--accent-cyan); text-shadow: 0 2px 10px rgba(107,255,238,0.5), 1px 2px 0 #000; }
+
+    /* ── Main Layout & Pages ───────────────────────────── */
+    .view-container { flex-grow: 1; position: relative; overflow: hidden; }
+    .page-view {
+      position: absolute; inset: 0; padding: var(--spacing-lg);
+      display: none; overflow-y: auto; overflow-x: hidden;
+      animation: fadeIn 0.3s ease-out;
+    }
+    .page-view.active { display: flex; gap: var(--spacing-lg); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Glass Panels */
+    .glass-panel {
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
       border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      padding: var(--spacing-md);
+      backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      display: flex; flex-direction: column;
     }
-    .panel-section.flex-grow { flex-grow: 1; overflow-y: auto; }
-    
-    .panel-title {
-      font-family: var(--font-header);
-      color: var(--accent-gold);
-      font-size: 18px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      padding-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
-    
-    .panel-subtitle { font-size: 12px; font-family: var(--font-body); color: var(--accent-purple); text-transform: uppercase; letter-spacing: 1px; }
+    .panel-header { font-family: var(--font-header); color: var(--accent); font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: var(--spacing-sm); margin-bottom: var(--spacing-md); display: flex; justify-content: space-between; align-items: baseline; }
+    .panel-subtitle { font-size: 12px; font-family: var(--font-body); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
 
-    /* Right Column Specifics */
-    .shop-header {
-      padding: 20px 20px 0 20px;
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--panel-border);
-    }
-    .shop-tabs { display: flex; gap: 10px; margin-bottom: -1px; }
-    .shop-tab { padding: 12px 20px; cursor: pointer; font-family: var(--font-header); color: var(--muted); border-bottom: 2px solid transparent; transition: opacity 0.2s; }
-    .shop-tab.active { color: var(--accent-gold); border-bottom-color: var(--accent-gold); }
+    /* ── Page 1: Main Game & Store ─────────────────────── */
+    .col-center { flex: 1.5; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+    .col-side { flex: 1; display: flex; flex-direction: column; gap: var(--spacing-lg); max-width: 400px; }
 
-    .shop-list { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-
-    .upgrade-item {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 12px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      cursor: pointer;
-      transition: transform 0.2s, background-color 0.2s;
-    }
-    .upgrade-item:hover { background: rgba(255,255,255,0.08); transform: translateX(-4px); }
-    .upgrade-item.affordable { border-left: 4px solid var(--accent-gold); }
-    .upgrade-item.affordable:hover { background: rgba(245,200,66,0.1); }
-    .upgrade-item.locked { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
-
-    /* Center Stage */
-    #hud-top {
-      position: absolute; top: 30px; left: 0; right: 0;
-      display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none;
-    }
-    .main-currency {
-      font-family: var(--font-header); font-size: 64px; font-weight: 900;
-      color: white; text-shadow: 0 4px 20px rgba(245,200,66,0.5), 2px 4px 0 #000;
-      display: flex; align-items: center; gap: 16px; pointer-events: auto;
-    }
-    .gem-currency { font-family: var(--font-header); font-size: 24px; color: var(--accent-cyan); text-shadow: 0 2px 10px rgba(107,255,238,0.5), 1px 2px 0 #000; }
-    
-    .status-row { display: flex; gap: 12px; pointer-events: auto; }
-    .status-pill {
-      background: rgba(0,0,0,0.6); border: 1px solid var(--panel-border); border-radius: 20px;
-      padding: 4px 12px; font-size: 12px; font-weight: 700; color: var(--accent-purple);
-      backdrop-filter: blur(4px); cursor: default; display: flex; align-items: center; gap: 6px;
-    }
-
-    /* The Cat */
     #cat-stage {
-      position: relative; width: 400px; height: 400px;
+      position: relative; width: 350px; height: 350px;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; transform-origin: bottom center;
     }
@@ -176,48 +157,66 @@
       transition: filter 0.5s, transform 0.05s cubic-bezier(0.2, 0.8, 0.2, 1);
       z-index: 2;
     }
-    /* Squash and Stretch */
     #cat-stage:active #cat-image { transform: scaleY(0.9) scaleX(1.1) translateY(10px); }
     
     .pedestal-glow {
-      position: absolute; bottom: 20px; width: 300px; height: 60px; border-radius: 50%;
+      position: absolute; bottom: 20px; width: 80%; height: 60px; border-radius: 50%;
       background: radial-gradient(ellipse at center, rgba(180,140,255,0.6) 0%, transparent 70%);
       transform: scaleY(0.5); z-index: 1;
     }
     @keyframes breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.02) scaleX(0.98); } }
 
-    /* Particles */
-    #particle-layer { position: absolute; inset: 0; pointer-events: none; z-index: 50; overflow: hidden; }
-    .dmg-text {
+    /* Lists & Items */
+    .list-container { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: var(--spacing-sm); padding-right: 4px; }
+    .upgrade-item {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 16px;
+      cursor: pointer; transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+    }
+    .upgrade-item:hover { background: rgba(255,255,255,0.08); transform: scale(0.98); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .upgrade-item:active { transform: scale(0.95); }
+    .upgrade-item.affordable { border-left: 4px solid var(--accent); }
+    .upgrade-item.affordable:hover { background: rgba(180,140,255,0.1); }
+    .upgrade-item.locked { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
+
+    /* ── Floating Damage Text ──────────────────────────── */
+    #fx-layer { position: absolute; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
+    .float-txt {
       position: absolute; font-family: var(--font-header); font-weight: 900; font-size: 28px;
       color: white; text-shadow: 0 0 10px var(--accent-gold), 2px 2px 0 #000;
       animation: floatUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
-    .dmg-text.crit { color: var(--accent-pink); font-size: 40px; text-shadow: 0 0 20px var(--accent-pink), 2px 2px 0 #000; }
-    .coin-particle {
-      position: absolute; width: 12px; height: 12px; border-radius: 50%;
-      background: var(--accent-gold); box-shadow: 0 0 15px var(--accent-gold);
-      animation: arc 0.8s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
-    }
+    .float-txt.crit { color: var(--accent-pink); font-size: 40px; text-shadow: 0 0 20px var(--accent-pink), 2px 2px 0 #000; }
     @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { transform: translateY(-30px) scale(1.2); opacity: 1; } 100% { transform: translateY(-150px) scale(1); opacity: 0; } }
-    @keyframes arc { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; } }
 
-    /* Buttons */
+    /* ── Buttons ───────────────────────────────────────── */
     .btn {
-      background: linear-gradient(135deg, var(--accent-purple), #8a4fff);
+      background: linear-gradient(135deg, var(--accent), #8a4fff);
       border: 1px solid rgba(255,255,255,0.2); color: white; font-family: var(--font-body);
-      font-weight: 700; padding: 10px 16px; border-radius: 8px; cursor: pointer; transition: opacity 0.2s, transform 0.2s;
-      text-transform: uppercase; letter-spacing: 1px; width: 100%;
+      font-weight: 700; padding: 10px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+      text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(180,140,255,0.4); }
-    .btn:active { transform: translateY(1px); }
+    .btn:hover { opacity: 0.9; transform: scale(0.96); box-shadow: 0 6px 20px rgba(180,140,255,0.4); }
+    .btn:active { transform: scale(0.92); }
     .btn-gold { background: linear-gradient(135deg, var(--accent-gold), #f57f17); color: #4e342e; }
-    .btn-outline { background: transparent; border-color: var(--panel-border); color: var(--muted); }
+    .btn-icon { background: rgba(255,255,255,0.05); border-color: var(--panel-border); padding: 8px; border-radius: 50%; }
 
-    /* Leaderboard Podium CSS */
+    /* ── Page 3: Battle System ─────────────────────────── */
+    .battle-arena {
+      flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px;
+    }
+    .health-bar-bg { width: 100%; max-width: 600px; height: 30px; background: rgba(0,0,0,0.6); border: 2px solid var(--panel-border); border-radius: 15px; overflow: hidden; position: relative; box-shadow: 0 0 20px rgba(255,42,109,0.3); }
+    .health-bar-fill { height: 100%; background: linear-gradient(90deg, #ff2a6d, #ff7b00); width: 100%; transition: width 0.1s; }
+    .health-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-header); font-weight: 900; font-size: 16px; text-shadow: 1px 1px 0 #000; }
+    
+    .enemy-stage { position: relative; width: 300px; height: 300px; cursor: crosshair; }
+    .enemy-sprite { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 20px #ff2a6d); transition: transform 0.05s; }
+    .enemy-stage:active .enemy-sprite { transform: scale(0.9) translateX(10px); filter: brightness(2) drop-shadow(0 0 40px red); }
+
+    /* ── Page 4: Leaderboard Podium ────────────────────── */
     .list-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 8px; position: relative; overflow: hidden; }
     .rank-1 { background: rgba(255, 215, 0, 0.1); border: 1px solid #FFD700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2) inset; }
-    .rank-1 .player-name { background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C); -webkit-background-clip: text; color: transparent; font-weight: 900; font-size: 16px; }
+    .rank-1 .player-name { background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C); -webkit-background-clip: text; color: transparent; font-weight: 900; font-size: 18px; }
     .rank-1 .crown { position: absolute; left: 16px; top: -8px; width: 24px; animation: bob 2s infinite ease-in-out; }
     
     .rank-2 { background: rgba(192, 192, 192, 0.05); border: 1px solid #C0C0C0; }
@@ -230,91 +229,178 @@
     @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
     @keyframes shimmer { 100% { left: 200%; } }
 
-    /* Modals */
+    /* ── Settings Modal ────────────────────────────────── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
-    .modal-content { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 24px; padding: 32px; width: 400px; text-align: center; transform: scale(0.9); transition: transform 0.3s; }
+    .modal-content { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 24px; padding: 32px; width: 500px; max-width: 90vw; transform: scale(0.9); transition: transform 0.3s; backdrop-filter: blur(25px); }
     .modal-overlay.active .modal-content { transform: scale(1); }
+    
+    .setting-group { margin-bottom: 20px; }
+    .setting-group label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+    
+    input[type="range"] { width: 100%; appearance: none; background: rgba(255,255,255,0.1); height: 6px; border-radius: 3px; outline: none; }
+    input[type="range"]::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+
+    .color-swatches { display: flex; gap: 10px; }
+    .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+    .color-swatch:hover { transform: scale(1.1); }
+    .color-swatch.active { border-color: white; box-shadow: 0 0 10px currentColor; }
+    
+    .toggle-group { display: flex; gap: 10px; }
+    .toggle-btn { flex: 1; padding: 8px; border: 1px solid var(--panel-border); background: rgba(0,0,0,0.3); color: var(--muted); border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .toggle-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
   </style>
 </head>
 <body>
   <script>if(!localStorage.getItem('catClickerToken')) window.location.replace('/auth.html');</script>
 
+  <!-- Visuals -->
   <div id="environment"><div id="star-field"></div></div>
-  <div id="particle-layer"></div>
+  <canvas id="particle-canvas"></canvas>
+  <div id="fx-layer"></div>
 
-  <!-- Left Column -->
-  <div id="col-left" class="col">
-    <!-- Time Machine -->
-    <div class="panel-section">
-      <div class="panel-title">Time Machine <span class="panel-subtitle">Saves</span></div>
-      <div id="history-list" style="max-height: 150px; overflow-y: auto;">
-        <div style="color:var(--muted); font-size:12px; text-align:center; padding:10px;">Loading timeline...</div>
-      </div>
-      <div style="font-size:10px; color:var(--muted); text-align:center; margin-top:4px;" id="save-status">Syncing to cloud...</div>
+  <!-- Navigation -->
+  <div class="nav-bar">
+    <div class="nav-brand">🐾 Feline Ascendancy</div>
+    <div class="nav-tabs" id="main-nav">
+      <div class="nav-tab active" data-target="view-main">Main & Store</div>
+      <div class="nav-tab" data-target="view-upgrades">Upgrades</div>
+      <div class="nav-tab" data-target="view-battle">Battle Arena</div>
+      <div class="nav-tab" data-target="view-leaderboard">Leaderboard</div>
+      <div class="nav-tab" data-target="view-academy">Academy</div>
     </div>
-
-    <!-- Leaderboard -->
-    <div class="panel-section flex-grow">
-      <div class="panel-title">Galactic Ranks <span class="panel-subtitle">Top 10</span></div>
-      <div id="leaderboard-list" style="display:flex; flex-direction:column; gap:4px; flex-grow:1; overflow-y:auto; padding-top: 10px;"></div>
-      <div id="leaderboard-me" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);"></div>
+    <div class="nav-controls">
+      <button class="btn btn-icon" onclick="openSettings()">⚙️</button>
+      <button class="btn btn-icon" onclick="game.logout()">🚪</button>
     </div>
   </div>
 
-  <!-- Center Column -->
-  <div id="col-center" class="col">
-    <div id="hud-top">
-      <div class="main-currency"><img src="/assets/tier3.png" style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 0 10px #f5c842);" onerror="this.style.display='none'"/> <span id="hud-coins">0</span></div>
-      <div class="gem-currency">💎 <span id="hud-gems">0</span></div>
-      <div class="status-row">
-        <div class="status-pill" id="badge-streak">🔥 Day 1</div>
-        <div class="status-pill" id="badge-mood">😸 Happy</div>
-        <div class="status-pill" id="badge-prestige" style="display:none; color:var(--accent-gold); border-color:var(--accent-gold);">✨ 0 Meta</div>
-      </div>
-    </div>
-
-    <div id="cat-stage">
-      <div class="pedestal-glow" id="cat-pedestal"></div>
-      <img src="/assets/tier1.png" id="cat-image" alt="Cat"/>
-    </div>
+  <!-- Global HUD -->
+  <div class="top-hud">
+    <div class="main-currency"><img src="/assets/tier3.png" style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 0 10px #f5c842);"/> <span id="hud-coins">0</span></div>
+    <div class="gem-currency">💎 <span id="hud-gems">0</span></div>
+    <button class="btn btn-gold" id="btn-prestige" onclick="game.prestige()" style="display:none; padding: 4px 16px;">✨ ASCEND (Prestige)</button>
+    <div style="font-size: 14px; font-weight: 700; color: var(--accent-gold);" id="hud-prestige"></div>
   </div>
 
-  <!-- Right Column -->
-  <div id="col-right" class="col">
-    <div class="shop-header">
-      <div class="shop-tabs">
-        <div class="shop-tab active">Store</div>
-      </div>
-    </div>
+  <div class="view-container">
     
-    <div class="shop-list" id="upgrades-list"></div>
-
-    <div style="padding:20px; border-top:1px solid var(--panel-border); background:rgba(0,0,0,0.3); display:flex; flex-direction:column; gap:12px;">
-      <div style="display:flex; gap:10px;">
-        <button class="btn btn-outline" id="btn-toggle-music" onclick="audio.toggleMusic()">🎵 Music: ON</button>
-        <button class="btn btn-outline" id="btn-toggle-sfx" onclick="audio.toggleSfx()">🔊 SFX: ON</button>
+    <!-- ==================== VIEW: MAIN & STORE ==================== -->
+    <div class="page-view active" id="view-main">
+      <div class="col-center">
+        <div id="cat-stage">
+          <div class="pedestal-glow" id="cat-pedestal"></div>
+          <img src="/assets/tier1.png" id="cat-image" alt="Cat"/>
+        </div>
+        <div style="margin-top: 20px; font-weight: 700; color: var(--accent); font-size: 20px;" id="hud-cps">0 / sec</div>
+        <div style="font-size: 14px; color: var(--muted);" id="hud-cpc">1 / click</div>
       </div>
-      <button class="btn btn-gold" id="btn-prestige" onclick="game.prestige()" style="display:none;">✨ ASCEND (Prestige)</button>
-      <div style="display:flex; gap:10px;">
-        <button class="btn btn-outline" onclick="game.logout()">Sign Out</button>
+      
+      <div class="col-side glass-panel">
+        <div class="panel-header">Unit Store <span class="panel-subtitle">Generators</span></div>
+        <div class="list-container" id="store-list"></div>
       </div>
     </div>
-  </div>
 
-  <div class="modal-overlay" id="offline-modal">
+    <!-- ==================== VIEW: UPGRADES ==================== -->
+    <div class="page-view" id="view-upgrades" style="justify-content: center;">
+      <div class="glass-panel" style="width: 100%; max-width: 800px;">
+        <div class="panel-header">Permanent Upgrades <span class="panel-subtitle">Click & Passive Buffs</span></div>
+        <div class="list-container" id="upgrades-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;"></div>
+      </div>
+    </div>
+
+    <!-- ==================== VIEW: BATTLE ARENA ==================== -->
+    <div class="page-view" id="view-battle">
+      <div class="glass-panel battle-arena">
+        <div style="text-align: center;">
+          <h2 style="font-family: var(--font-header); color: var(--accent-pink); font-size: 32px;" id="enemy-name">Void Rat (Stage 1)</h2>
+          <p style="color: var(--muted);">Click to attack! Passive income deals damage over time.</p>
+        </div>
+        
+        <div class="health-bar-bg">
+          <div class="health-bar-fill" id="enemy-hp-fill"></div>
+          <div class="health-text" id="enemy-hp-text">100 / 100</div>
+        </div>
+        
+        <div class="enemy-stage" onmousedown="battle.clickAttack(event)">
+          <img src="/assets/tier2.png" class="enemy-sprite" id="enemy-sprite" style="filter: hue-rotate(90deg) grayscale(0.5);" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== VIEW: LEADERBOARD ==================== -->
+    <div class="page-view" id="view-leaderboard" style="justify-content: center;">
+      <div class="glass-panel" style="width: 100%; max-width: 600px;">
+        <div class="panel-header">Galactic Ranks <span class="panel-subtitle">Top Players</span></div>
+        <div class="list-container" id="leaderboard-list"></div>
+      </div>
+    </div>
+
+    <!-- ==================== VIEW: ACADEMY ==================== -->
+    <div class="page-view" id="view-academy" style="justify-content: center;">
+      <div class="glass-panel" style="width: 100%; max-width: 800px; padding: 40px; line-height: 1.6;">
+        <h1 style="font-family: var(--font-header); color: var(--accent-gold); margin-bottom: 20px;">Welcome to the Academy</h1>
+        <h3 style="color: var(--accent); margin-top: 20px;">The Core Loop</h3>
+        <p style="color: var(--muted);">Click the main cat to earn coins. Spend coins in the <strong>Store</strong> to buy generators that earn coins passively. Head to <strong>Upgrades</strong> to multiply your clicking power and generation rate.</p>
+        
+        <h3 style="color: var(--accent); margin-top: 20px;">Battle Arena</h3>
+        <p style="color: var(--muted);">In the Battle Arena, your Click Power translates directly to Active Damage, and your Passive Income becomes Damage Per Second. Defeating enemies drops huge proportional coin rewards.</p>
+        
+        <h3 style="color: var(--accent); margin-top: 20px;">Ascension & Infinite Scaling</h3>
+        <p style="color: var(--muted);">Because Feline Ascendancy utilizes BigInt architecture, numbers will scale infinitely. Once you reach 1 Trillion lifetime coins, you can Ascend. Ascension wipes your current progress but grants Meta Currency via an exponential equation, permanently boosting all future loops.</p>
+      </div>
+    </div>
+
+  </div> <!-- End View Container -->
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal">
     <div class="modal-content">
-      <h2 style="font-family:var(--font-header); color:var(--accent-gold); margin-bottom:10px; font-size:32px;">Welcome Back!</h2>
-      <p style="color:var(--muted); margin-bottom:30px;">Your cats farmed cosmic energy offline!</p>
-      <div style="font-family:var(--font-header); font-size:40px; color:var(--accent-cyan); margin-bottom:10px;" id="offline-coins">+0</div>
-      <button class="btn btn-cyan" onclick="document.getElementById('offline-modal').classList.remove('active')">Collect</button>
+      <div class="panel-header">Settings <button class="btn btn-icon" style="padding: 4px;" onclick="closeSettings()">❌</button></div>
+      
+      <div class="setting-group">
+        <label>Music Volume (<span id="lbl-music-vol">30</span>%)</label>
+        <input type="range" id="rng-music" min="0" max="100" value="30" oninput="audio.setMusicVol(this.value)">
+      </div>
+      <div class="setting-group">
+        <label>SFX Volume (<span id="lbl-sfx-vol">50</span>%)</label>
+        <input type="range" id="rng-sfx" min="0" max="100" value="50" oninput="audio.setSfxVol(this.value)">
+      </div>
+
+      <div class="setting-group">
+        <label>Theme Color</label>
+        <div class="color-swatches">
+          <div class="color-swatch active" style="background: #b48cff;" onclick="setTheme(this, '#b48cff')"></div>
+          <div class="color-swatch" style="background: #f5c842;" onclick="setTheme(this, '#f5c842')"></div>
+          <div class="color-swatch" style="background: #6bffee;" onclick="setTheme(this, '#6bffee')"></div>
+          <div class="color-swatch" style="background: #ff8cda;" onclick="setTheme(this, '#ff8cda')"></div>
+          <div class="color-swatch" style="background: #ff2a6d;" onclick="setTheme(this, '#ff2a6d')"></div>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label>Graphics Quality</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" id="btn-gfx-low" onclick="setGraphics('low')">Low</button>
+          <button class="toggle-btn active" id="btn-gfx-high" onclick="setGraphics('high')">High</button>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label>UI Compact Mode</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" id="btn-ui-normal" onclick="setCompact(false)">Normal</button>
+          <button class="toggle-btn" id="btn-ui-compact" onclick="setCompact(true)">Compact</button>
+        </div>
+      </div>
     </div>
   </div>
 <script>
 /**
  * INFINITE INCREMENTAL GAME - MONOLITHIC LOGIC
- * Phase 2: BigInt Mathematics & State Management
- * Phase 3: Procedural Web Audio ADSR Synthesizer
+ * Phase 2, 3, 4: Advanced Tabs, Battle, Settings, and Audio
  */
 
 // --- UTILS ---
@@ -322,7 +408,7 @@ function formatBigInt(val) {
   if (typeof val !== 'bigint') val = BigInt(val || 0);
   if (val < 1000n) return val.toString();
   
-  const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi"];
+  const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
   let numStr = val.toString();
   let length = numStr.length;
   let suffixIndex = Math.floor((length - 1) / 3);
@@ -334,7 +420,6 @@ function formatBigInt(val) {
     let decimal = numStr.substring(remainder, remainder + 2);
     return `${main}.${decimal}${suffixes[suffixIndex]}`;
   } else {
-    // Scientific Notation or Bracket notation for massive numbers
     let exponent = length - 1;
     let main = numStr[0];
     let decimal = numStr.substring(1, 3);
@@ -345,22 +430,14 @@ function formatBigInt(val) {
 // --- API ---
 const API = {
   getToken: () => localStorage.getItem('catClickerToken'),
-  headers: () => ({
-    'Authorization': 'Bearer ' + localStorage.getItem('catClickerToken'),
-    'Content-Type': 'application/json'
-  }),
+  headers: () => ({ 'Authorization': 'Bearer ' + localStorage.getItem('catClickerToken'), 'Content-Type': 'application/json' }),
   async save(gameState, reason = 'autosave') {
     if (!this.getToken()) return;
-    try {
-      await fetch('/api/save', { method: 'POST', headers: this.headers(), body: JSON.stringify({ save: gameState, reason }) });
-    } catch(e) { console.error('Save failed', e); }
+    try { await fetch('/api/save', { method: 'POST', headers: this.headers(), body: JSON.stringify({ save: gameState, reason }) }); } catch(e) {}
   },
   async load() {
     const res = await fetch('/api/save', { headers: this.headers() });
-    if (!res.ok) {
-      if (res.status === 401) { localStorage.removeItem('catClickerToken'); window.location.replace('/auth.html'); }
-      throw new Error('Failed to load save');
-    }
+    if (!res.ok) { if (res.status === 401) { localStorage.removeItem('catClickerToken'); window.location.replace('/auth.html'); } throw new Error('Failed to load'); }
     return res.json();
   },
   async leaderboard() {
@@ -380,43 +457,46 @@ const API = {
 
 // --- PROCEDURAL AUDIO ---
 const audio = {
-  ctx: null, masterGain: null,
+  ctx: null, musicGain: null, sfxGain: null,
   musicTimer: null, musicStep: 0,
-  settings: { music: true, sfx: true },
+  settings: { music: true, sfx: true, volMusic: 0.3, volSfx: 0.5 },
   nextNoteTime: 0,
   
   init() {
     if (!this.ctx) {
       this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-      this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.value = 0.3;
-      this.masterGain.connect(this.ctx.destination);
+      this.musicGain = this.ctx.createGain();
+      this.sfxGain = this.ctx.createGain();
+      
+      this.musicGain.gain.value = this.settings.volMusic;
+      this.sfxGain.gain.value = this.settings.volSfx;
+      
+      this.musicGain.connect(this.ctx.destination);
+      this.sfxGain.connect(this.ctx.destination);
     }
     if (this.ctx.state === 'suspended') this.ctx.resume();
   },
   
-  playADSR(freq, type='square', attack=0.01, decay=0.1, sustain=0, release=0.1, vol=0.1) {
-    if (!this.settings.sfx && type !== 'music') return;
-    if (!this.settings.music && type === 'music') return;
+  playADSR(freq, type='square', attack=0.01, decay=0.1, sustain=0, release=0.1, vol=0.1, isMusic=false) {
+    if (!this.settings.sfx && !isMusic) return;
+    if (!this.settings.music && isMusic) return;
     this.init();
     
     const t = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const env = this.ctx.createGain();
     
-    osc.type = type === 'music' ? 'square' : type;
+    osc.type = type;
     osc.frequency.setValueAtTime(freq, t);
     
-    // ADSR Envelope
     env.gain.setValueAtTime(0, t);
     env.gain.linearRampToValueAtTime(vol, t + attack);
     env.gain.exponentialRampToValueAtTime(Math.max(0.001, sustain), t + attack + decay);
     
     osc.connect(env);
-    env.connect(this.masterGain);
+    env.connect(isMusic ? this.musicGain : this.sfxGain);
     
     osc.start(t);
-    
     const stopTime = t + attack + decay + release;
     env.gain.exponentialRampToValueAtTime(0.0001, stopTime);
     osc.stop(stopTime + 0.1);
@@ -438,49 +518,38 @@ const audio = {
     env.gain.exponentialRampToValueAtTime(0.001, t + dur);
     
     osc.connect(env);
-    env.connect(this.masterGain);
+    env.connect(this.sfxGain);
     osc.start(t);
     osc.stop(t + dur);
   },
 
-  click(isCrit) {
-    if (isCrit) this.playSweep(1200, 400, 0.3);
-    else this.playSweep(800, 1600, 0.1);
-  },
-
-  buy() { this.playADSR(880, 'square', 0.05, 0.1, 0, 0.1, 0.2); },
+  click(isCrit) { if (isCrit) this.playSweep(1200, 400, 0.3); else this.playSweep(800, 1600, 0.1); },
+  buy() { this.playADSR(880, 'square', 0.05, 0.1, 0, 0.1, 0.2, false); },
+  boom() { this.playADSR(100, 'sawtooth', 0.01, 0.5, 0, 0.5, 0.3, false); }, // Boss death sound
   
-  // Algorithmic Sequencer
   scheduler() {
     if (!this.settings.music) return;
     while (this.nextNoteTime < this.ctx.currentTime + 0.1) {
       this.scheduleNote();
-      this.nextNoteTime += 0.25; // 16th notes
+      this.nextNoteTime += 0.25;
     }
     this.musicTimer = requestAnimationFrame(() => this.scheduler());
   },
   
   scheduleNote() {
-    const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; // C Major Pentatonic
-    
-    // Bassline
+    const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
     if (this.musicStep % 4 === 0) {
       const root = scale[0] / 2;
-      this.playADSR(root, 'music', 0.05, 0.2, 0, 0.1, 0.2);
+      this.playADSR(root, 'square', 0.05, 0.2, 0, 0.1, 0.2, true);
     }
-    
-    // Arpeggiator (dynamic layers based on passive income)
     if (game.state.passiveIncome > 0n && this.musicStep % 2 === 0) {
       const note = scale[Math.floor(Math.random() * scale.length)];
-      this.playADSR(note, 'music', 0.02, 0.1, 0, 0.1, 0.05);
+      this.playADSR(note, 'triangle', 0.02, 0.1, 0, 0.1, 0.05, true);
     }
-    
-    // High layer (late game)
     if (game.state.passiveIncome > 1000n && Math.random() < 0.3) {
       const highNote = scale[Math.floor(Math.random() * scale.length)] * 2;
-      this.playADSR(highNote, 'music', 0.01, 0.05, 0, 0.1, 0.03);
+      this.playADSR(highNote, 'sine', 0.01, 0.05, 0, 0.1, 0.03, true);
     }
-    
     this.musicStep++;
   },
 
@@ -496,43 +565,126 @@ const audio = {
   toggleMusic() {
     this.settings.music = !this.settings.music;
     document.getElementById('btn-toggle-music').textContent = this.settings.music ? '🎵 Music: ON' : '🎵 Music: OFF';
-    if (!this.settings.music) {
-      cancelAnimationFrame(this.musicTimer);
-      this.musicTimer = null;
-    } else {
-      this.startMusic();
-    }
-    game.autoSave();
+    if (!this.settings.music) { cancelAnimationFrame(this.musicTimer); this.musicTimer = null; } else { this.startMusic(); }
   },
 
   toggleSfx() {
     this.settings.sfx = !this.settings.sfx;
     document.getElementById('btn-toggle-sfx').textContent = this.settings.sfx ? '🔊 SFX: ON' : '🔊 SFX: OFF';
-    game.autoSave();
+  },
+
+  setMusicVol(val) {
+    this.settings.volMusic = val / 100;
+    if (this.musicGain) this.musicGain.gain.value = this.settings.volMusic;
+    document.getElementById('lbl-music-vol').textContent = val;
+  },
+
+  setSfxVol(val) {
+    this.settings.volSfx = val / 100;
+    if (this.sfxGain) this.sfxGain.gain.value = this.settings.volSfx;
+    document.getElementById('lbl-sfx-vol').textContent = val;
   }
 };
+
+// --- SETTINGS LOGIC ---
+function openSettings() { document.getElementById('settings-modal').classList.add('active'); }
+function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); game.autoSave(); }
+
+function setTheme(el, color) {
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.documentElement.style.setProperty('--accent', color);
+  game.settings.color = color;
+}
+
+function setGraphics(level) {
+  document.getElementById('btn-gfx-low').classList.toggle('active', level === 'low');
+  document.getElementById('btn-gfx-high').classList.toggle('active', level === 'high');
+  if (level === 'low') document.body.classList.add('graphic-low');
+  else document.body.classList.remove('graphic-low');
+  game.settings.graphics = level;
+}
+
+function setCompact(isCompact) {
+  document.getElementById('btn-ui-normal').classList.toggle('active', !isCompact);
+  document.getElementById('btn-ui-compact').classList.toggle('active', isCompact);
+  if (isCompact) document.body.classList.add('compact-mode');
+  else document.body.classList.remove('compact-mode');
+  game.settings.compact = isCompact;
+}
+
+// --- TABS LOGIC ---
+document.getElementById('main-nav').addEventListener('click', (e) => {
+  if (e.target.classList.contains('nav-tab')) {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+    e.target.classList.add('active');
+    document.getElementById(e.target.dataset.target).classList.add('active');
+    if (e.target.dataset.target === 'view-leaderboard') ui.fetchLeaderboard();
+  }
+});
+
+// --- PARTICLES ---
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function initParticles() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', initParticles);
+initParticles();
+
+function drawParticles() {
+  if (document.body.classList.contains('graphic-low')) return requestAnimationFrame(drawParticles);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (Math.random() < 0.1 && particles.length < 50) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: canvas.height + 10,
+      r: Math.random() * 3 + 1,
+      vy: -(Math.random() * 1 + 0.5),
+      op: Math.random() * 0.5 + 0.1
+    });
+  }
+  for (let i = particles.length - 1; i >= 0; i--) {
+    let p = particles[i];
+    p.y += p.vy;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(180, 140, 255, ${p.op})`;
+    ctx.fill();
+    if (p.y < -10) particles.splice(i, 1);
+  }
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
 
 // --- GAME LOGIC ---
 const game = {
   state: {
     coins: 0n, gems: 0n, totalCoins: 0n, clickPower: 1n, passiveIncome: 0n,
-    prestigeMultiplier: 100n, // Base 100 for 1.00x
-    prestigeCurrency: 0n,
+    prestigeMultiplier: 100n, prestigeCurrency: 0n,
     tier: 1, streak: 1, lastLogin: Date.now(),
+    battlesWon: 0n, bossesDefeated: 0n,
     upgrades: {}
   },
+  settings: { color: '#b48cff', graphics: 'high', compact: false },
   historyData: [],
   
-  shop: [
+  generators: [
     { id: 't1', name: 'Tails (Common)', baseCost: 50n, cps: 1n, multiplier: 1.15, icon: '🐁' },
     { id: 't2', name: 'Spot (Common)', baseCost: 250n, cps: 5n, multiplier: 1.15, icon: '🧶' },
     { id: 't3', name: 'Blinx (Uncommon)', baseCost: 1500n, cps: 35n, multiplier: 1.15, icon: '🐈' },
     { id: 't4', name: 'Meowth (Uncommon)', baseCost: 10000n, cps: 200n, multiplier: 1.12, icon: '🪙' },
     { id: 't5', name: 'Incineroar (Rare)', baseCost: 500000n, cps: 8500n, multiplier: 1.10, icon: '🔥' },
     { id: 't6', name: 'Jolteon (Epic)', baseCost: 10000000n, cps: 150000n, multiplier: 1.08, icon: '⚡' },
-    { id: 't7', name: 'Kratos (Legendary)', baseCost: 1000000000n, cps: 10000000n, multiplier: 1.07, icon: '⚔️' },
-    { id: 'click1', name: 'Sharpen Claws', baseCost: 100n, click: 1n, multiplier: 1.5, icon: '🐾' },
-    { id: 'click2', name: 'Laser Pointer', baseCost: 5000n, click: 50n, multiplier: 1.4, icon: '🔴' }
+    { id: 't7', name: 'Kratos (Legendary)', baseCost: 1000000000n, cps: 10000000n, multiplier: 1.07, icon: '⚔️' }
+  ],
+  upgrades: [
+    { id: 'click1', name: 'Sharpen Claws', baseCost: 100n, click: 1n, multiplier: 1.5, icon: '🐾', desc: '+1 Click Power' },
+    { id: 'click2', name: 'Laser Pointer', baseCost: 5000n, click: 50n, multiplier: 1.4, icon: '🔴', desc: '+50 Click Power' },
+    { id: 'click3', name: 'Cosmic Glove', baseCost: 250000n, click: 2000n, multiplier: 1.3, icon: '🌌', desc: '+2K Click Power' }
   ],
 
   init(savedData, history) {
@@ -542,46 +694,57 @@ const game = {
       this.state.totalCoins = BigInt(savedData.stats?.totalCoinsEarned || savedData.currency?.coins || 0);
       this.state.upgrades = savedData.upgrades || {};
       this.state.streak = savedData.stats?.streak || 1;
+      this.state.battlesWon = BigInt(savedData.stats?.battlesWon || 0);
+      this.state.bossesDefeated = BigInt(savedData.stats?.bossesDefeated || 0);
       this.state.lastLogin = savedData.meta?.lastSavedAt ? Date.parse(savedData.meta.lastSavedAt) : Date.now();
       this.state.tier = savedData.player?.tier || 1;
       
-      // Prestige comes from the server summary natively, but we calc it here to display it
       const prevMeta = BigInt(savedData.stats?.metaCurrency || 0);
       this.state.prestigeCurrency = prevMeta;
-      this.state.prestigeMultiplier = 100n + (prevMeta * 5n); // Each point = 5% bonus
+      this.state.prestigeMultiplier = 100n + (prevMeta * 5n); // 5% per point
+      
+      if (savedData.settings) {
+        this.settings = Object.assign(this.settings, savedData.settings);
+        document.documentElement.style.setProperty('--accent', this.settings.color);
+        setGraphics(this.settings.graphics);
+        setCompact(this.settings.compact);
+        // Find swatch and activate it
+        document.querySelectorAll('.color-swatch').forEach(s => {
+          if (s.style.background === this.settings.color || s.style.backgroundColor === this.settings.color) {
+            document.querySelectorAll('.color-swatch').forEach(ss => ss.classList.remove('active'));
+            s.classList.add('active');
+          }
+        });
+      }
     }
     this.historyData = history || [];
-    
     this.recalculateStats();
     this.processOffline();
+    battle.init();
     
     document.getElementById('cat-stage').addEventListener('pointerdown', (e) => this.clickCat(e));
-    
     setInterval(() => this.tick(), 1000);
     setInterval(() => this.autoSave(), 30000);
     
     ui.renderShop();
+    ui.renderUpgrades();
+    ui.renderHistory();
     ui.updateHud();
     ui.fetchLeaderboard();
   },
 
   recalculateStats() {
     let passive = 0n, click = 1n;
-    this.shop.forEach(item => {
-      const count = BigInt(this.state.upgrades[item.id] || 0);
-      if (item.cps) passive += count * item.cps;
-      if (item.click) click += count * item.click;
-    });
+    this.generators.forEach(item => { const count = BigInt(this.state.upgrades[item.id] || 0); passive += count * item.cps; });
+    this.upgrades.forEach(item => { const count = BigInt(this.state.upgrades[item.id] || 0); click += count * item.click; });
     
-    // Apply prestige multiplier (Base 100)
     this.state.passiveIncome = (passive * this.state.prestigeMultiplier) / 100n;
     this.state.clickPower = (click * this.state.prestigeMultiplier) / 100n;
+    document.getElementById('hud-cps').textContent = `${formatBigInt(this.state.passiveIncome)} / sec`;
+    document.getElementById('hud-cpc').textContent = `${formatBigInt(this.state.clickPower)} / click`;
   },
 
-  calcCost(baseCost, multiplier, count) {
-    // Exponential calculation for BigInt
-    return baseCost * BigInt(Math.floor(Math.pow(multiplier, count)));
-  },
+  calcCost(baseCost, multiplier, count) { return baseCost * BigInt(Math.floor(Math.pow(multiplier, count))); },
 
   clickCat(e) {
     const isCrit = Math.random() < 0.1;
@@ -593,14 +756,14 @@ const game = {
     
     audio.click(isCrit);
     ui.spawnParticles(e.clientX, e.clientY, amount, isCrit);
-    
     this.checkEvolution();
     ui.updateHud();
-    ui.renderShop(); // Update affordability
+    ui.renderShop(); ui.renderUpgrades();
   },
 
-  buy(id) {
-    const item = this.shop.find(i => i.id === id);
+  buy(id, type) {
+    const arr = type === 'gen' ? this.generators : this.upgrades;
+    const item = arr.find(i => i.id === id);
     const count = this.state.upgrades[id] || 0;
     const cost = this.calcCost(item.baseCost, item.multiplier, count);
     
@@ -608,7 +771,7 @@ const game = {
       this.state.coins -= cost;
       this.state.upgrades[id] = count + 1;
       this.recalculateStats();
-      ui.renderShop();
+      if (type === 'gen') ui.renderShop(); else ui.renderUpgrades();
       ui.updateHud();
       audio.buy();
     }
@@ -619,7 +782,6 @@ const game = {
     if (this.state.totalCoins >= 1000000000n) newTier = 4;
     else if (this.state.totalCoins >= 1000000n) newTier = 3;
     else if (this.state.totalCoins >= 10000n) newTier = 2;
-    
     if (newTier > this.state.tier) {
       this.state.tier = newTier;
       document.getElementById('cat-image').src = `/assets/tier${newTier}.png`;
@@ -631,8 +793,9 @@ const game = {
       this.state.coins += this.state.passiveIncome;
       this.state.totalCoins += this.state.passiveIncome;
       ui.updateHud();
-      ui.renderShop();
+      ui.renderShop(); ui.renderUpgrades();
     }
+    battle.tick();
   },
 
   processOffline() {
@@ -651,24 +814,14 @@ const game = {
   },
 
   prestige() {
-    // Requires minimum 1 Trillion lifetime coins
-    if (this.state.totalCoins < 1000000000000n) {
-      alert("You need at least 1 Trillion coins to ascend!");
-      return;
-    }
-    
+    if (this.state.totalCoins < 1000000000000n) { alert("You need at least 1 Trillion coins to ascend!"); return; }
     const metaGained = BigInt(Math.floor(Math.pow(Number(this.state.totalCoins) / 1000000, 0.35)));
-    
     if (confirm(`Ascend to a higher plane? You will gain ${metaGained} Meta Currency, resetting all coins and units.`)) {
       this.state.prestigeCurrency += metaGained;
-      this.state.coins = 0n;
-      this.state.totalCoins = 0n;
-      this.state.upgrades = {};
-      this.state.tier = 1;
-      this.recalculateStats();
-      this.checkEvolution();
-      ui.renderShop();
-      ui.updateHud();
+      this.state.coins = 0n; this.state.totalCoins = 0n; this.state.upgrades = {}; this.state.tier = 1; this.state.battlesWon = 0n;
+      this.recalculateStats(); this.checkEvolution();
+      ui.renderShop(); ui.renderUpgrades(); ui.updateHud();
+      battle.init();
       this.autoSave('manual');
     }
   },
@@ -679,24 +832,92 @@ const game = {
     const payload = {
       meta: { lastSavedAt: new Date().toISOString() },
       player: { tier: this.state.tier },
+      settings: this.settings,
       currency: { coins: this.state.coins.toString(), gems: this.state.gems.toString() },
-      stats: { totalCoinsEarned: this.state.totalCoins.toString(), streak: this.state.streak, metaCurrency: this.state.prestigeCurrency.toString() },
+      stats: { totalCoinsEarned: this.state.totalCoins.toString(), streak: this.state.streak, metaCurrency: this.state.prestigeCurrency.toString(), battlesWon: this.state.battlesWon.toString(), bossesDefeated: this.state.bossesDefeated.toString() },
       upgrades: this.state.upgrades
     };
-    API.save(payload, reason).then(() => {
-      if(sts) sts.textContent = 'Saved just now';
-    });
+    API.save(payload, reason).then(() => { if(sts) sts.textContent = 'Saved just now'; });
   },
   
-  restore(id) {
-    if (confirm('Restore this point in time? Current progress will be lost!')) {
-      API.restore(id);
+  restore(id) { if (confirm('Restore this point in time? Current progress will be lost!')) API.restore(id); },
+  logout() { this.autoSave('manual'); API.logout(); }
+};
+
+// --- BATTLE SYSTEM ---
+const battle = {
+  level: 1n,
+  maxHp: 1000n,
+  currentHp: 1000n,
+  names: ["Void Rat", "Shadow Hound", "Abyssal Crawler", "Astral Knight", "Nebula Dragon"],
+  
+  init() {
+    this.level = game.state.battlesWon + 1n;
+    this.calculateMaxHp();
+    this.currentHp = this.maxHp;
+    this.updateUI();
+  },
+
+  calculateMaxHp() {
+    // Base HP * (1.15 ^ level) using integer math incrementally
+    let hp = 1000n;
+    for(let i=1n; i<this.level; i++) {
+      hp = (hp * 115n) / 100n;
+    }
+    this.maxHp = hp;
+  },
+
+  tick() {
+    if (game.state.passiveIncome > 0n) this.dealDamage(game.state.passiveIncome);
+  },
+
+  clickAttack(e) {
+    if (game.state.clickPower > 0n) {
+      this.dealDamage(game.state.clickPower);
+      ui.spawnParticles(e.clientX, e.clientY, game.state.clickPower, false);
+      audio.playADSR(200, 'sawtooth', 0.01, 0.1, 0, 0.1, 0.3, false); // hit sound
     }
   },
 
-  logout() {
-    this.autoSave('manual');
-    API.logout();
+  dealDamage(amount) {
+    if (this.currentHp <= 0n) return;
+    this.currentHp -= amount;
+    if (this.currentHp <= 0n) {
+      this.currentHp = 0n;
+      this.victory();
+    }
+    this.updateUI();
+  },
+
+  victory() {
+    audio.boom();
+    game.state.battlesWon++;
+    if (this.level % 10n === 0n) game.state.bossesDefeated++;
+    
+    // Proportional Loot Drops (5% of max HP in coins)
+    const loot = (this.maxHp * 5n) / 100n;
+    game.state.coins += loot;
+    game.state.totalCoins += loot;
+    
+    // Massive Floating Text Burst
+    const rect = document.querySelector('.enemy-stage').getBoundingClientRect();
+    for (let i=0; i<10; i++) {
+      setTimeout(() => {
+        ui.spawnParticles(rect.left + Math.random()*rect.width, rect.top + Math.random()*rect.height, loot/10n, true);
+      }, i * 100);
+    }
+    
+    setTimeout(() => { this.init(); }, 1500); // Wait 1.5s for next monster
+  },
+
+  updateUI() {
+    const enemyName = this.level % 10n === 0n ? "BOSS: " + this.names[4] : this.names[Number(this.level % 4n)];
+    document.getElementById('enemy-name').textContent = `${enemyName} (Stage ${this.level})`;
+    
+    // Ratio % calculation
+    let pct = Number((this.currentHp * 10000n) / this.maxHp) / 100;
+    document.getElementById('enemy-hp-fill').style.width = `${Math.max(0, pct)}%`;
+    document.getElementById('enemy-hp-text').textContent = `${formatBigInt(this.currentHp)} / ${formatBigInt(this.maxHp)}`;
   }
 };
 
@@ -710,33 +931,30 @@ const ui = {
     if (game.state.prestigeCurrency > 0n) {
       pb.style.display = 'flex';
       pb.textContent = `✨ ${game.state.prestigeCurrency} Meta`;
+      document.getElementById('hud-prestige').textContent = `Total Multiplier: +${game.state.prestigeCurrency * 5n}%`;
     }
     
     const btnPrestige = document.getElementById('btn-prestige');
-    if (game.state.totalCoins > 1000000000000n) {
-      btnPrestige.style.display = 'block';
-    }
+    if (game.state.totalCoins > 1000000000000n) btnPrestige.style.display = 'block';
   },
 
   renderShop() {
-    const list = document.getElementById('upgrades-list');
+    const list = document.getElementById('store-list');
     list.innerHTML = '';
-    game.shop.forEach(item => {
+    game.generators.forEach(item => {
       const count = game.state.upgrades[item.id] || 0;
       const cost = game.calcCost(item.baseCost, item.multiplier, count);
       const canAfford = game.state.coins >= cost;
       
       const row = document.createElement('div');
       row.className = `upgrade-item ${canAfford ? 'affordable' : 'locked'}`;
-      row.onclick = () => { if(canAfford) game.buy(item.id); };
-      
-      const effectTxt = item.cps ? `+${formatBigInt(item.cps)}/sec` : `+${formatBigInt(item.click)}/click`;
+      row.onclick = () => { if(canAfford) game.buy(item.id, 'gen'); };
       
       row.innerHTML = `
         <div style="font-size:32px;">${item.icon}</div>
         <div style="flex-grow:1;">
-          <div style="font-family:var(--font-header); color:var(--accent-gold); font-size:16px;">${item.name}</div>
-          <div style="font-size:11px; color:var(--muted);">${effectTxt}</div>
+          <div style="font-family:var(--font-header); color:var(--accent); font-size:16px;">${item.name}</div>
+          <div style="font-size:11px; color:var(--muted);">+${formatBigInt(item.cps)}/sec</div>
         </div>
         <div style="text-align:right;">
           <div style="font-size:14px; font-weight:700;">C ${formatBigInt(cost)}</div>
@@ -747,79 +965,96 @@ const ui = {
     });
   },
 
+  renderUpgrades() {
+    const list = document.getElementById('upgrades-list');
+    list.innerHTML = '';
+    game.upgrades.forEach(item => {
+      const count = game.state.upgrades[item.id] || 0;
+      const cost = game.calcCost(item.baseCost, item.multiplier, count);
+      const canAfford = game.state.coins >= cost;
+      
+      const row = document.createElement('div');
+      row.className = `upgrade-item ${canAfford ? 'affordable' : 'locked'}`;
+      row.onclick = () => { if(canAfford) game.buy(item.id, 'upg'); };
+      
+      row.innerHTML = `
+        <div style="font-size:40px;">${item.icon}</div>
+        <div style="flex-grow:1;">
+          <div style="font-family:var(--font-header); color:var(--accent); font-size:18px;">${item.name}</div>
+          <div style="font-size:12px; color:var(--muted);">${item.desc}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:16px; font-weight:700;">C ${formatBigInt(cost)}</div>
+          <div style="font-size:12px; color:var(--accent-purple);">Lvl ${count}</div>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+  },
+
+  renderHistory() {
+    const list = document.getElementById('history-list');
+    list.innerHTML = '';
+    if (!game.historyData || game.historyData.length === 0) return list.innerHTML = '<div style="color:var(--muted); font-size:12px; text-align:center;">No timeline records</div>';
+    game.historyData.forEach(h => {
+      const d = new Date(h.savedAt);
+      const row = document.createElement('div');
+      row.style = "display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 4px;";
+      row.innerHTML = `
+        <div><div style="font-size:12px; font-weight:700; color:var(--accent);">${h.reason}</div><div style="font-size:10px; color:var(--muted);">${d.toLocaleDateString()}</div></div>
+        <button class="btn btn-outline" style="width:auto; padding:4px 8px; font-size:10px;" onclick="game.restore('${h.id}')">Restore</button>
+      `;
+      list.appendChild(row);
+    });
+  },
+
   async fetchLeaderboard() {
     const data = await API.leaderboard();
     const list = document.getElementById('leaderboard-list');
     list.innerHTML = '';
-    if (!data.leaderboard || !data.leaderboard.length) {
-      list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">No rank data</div>';
-      return;
-    }
-    
+    if (!data.leaderboard || !data.leaderboard.length) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">No rank data</div>'; return; }
     data.leaderboard.forEach((p, i) => {
       const row = document.createElement('div');
-      row.className = `list-row rank-${i + 1}`;
-      if (i > 2) row.className = 'list-row'; // Normal style for >3
+      row.className = `list-row ${i < 3 ? 'rank-'+(i+1) : ''}`;
       
       let crownHtml = '';
-      if (i === 0) {
-        crownHtml = `<svg class="crown" viewBox="0 0 24 24" fill="#FFD700"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5Z"/></svg>`;
-      }
+      if (i === 0) crownHtml = `<svg class="crown" viewBox="0 0 24 24" fill="#FFD700"><path d="M5 16L3 5L8.5 10L12 2L15.5 10L21 5L19 16H5Z"/></svg>`;
       
-      // We parse the string back, although server summary might just provide Number strings.
-      // If server provides strings for massive scores, formatBigInt handles it natively since we cast BigInt
       row.innerHTML = `
         ${crownHtml}
-        <div style="display:flex; align-items:center; gap:8px; z-index:2;">
-          <div style="width:24px; height:24px; border-radius:50%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900;">${i+1}</div>
+        <div style="display:flex; align-items:center; gap:12px; z-index:2;">
+          <div style="width:28px; height:28px; border-radius:50%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900;">${i+1}</div>
           <div class="player-name">${p.displayName || p.username}</div>
         </div>
-        <div style="font-family:var(--font-header); font-size:14px; z-index:2;">${formatBigInt(BigInt(p.score || 0))}</div>
+        <div style="font-family:var(--font-header); font-size:16px; z-index:2; font-weight:700;">${formatBigInt(BigInt(p.score || 0))}</div>
       `;
       list.appendChild(row);
     });
   },
 
   spawnParticles(x, y, amount, isCrit) {
-    const layer = document.getElementById('particle-layer');
+    const layer = document.getElementById('fx-layer');
     const txt = document.createElement('div');
-    txt.className = `dmg-text ${isCrit ? 'crit' : ''}`;
+    txt.className = `float-txt ${isCrit ? 'crit' : ''}`;
     txt.textContent = isCrit ? `CRIT! +${formatBigInt(amount)}` : `+${formatBigInt(amount)}`;
     txt.style.left = (x + (Math.random()*40-20)) + 'px';
     txt.style.top = (y - 30) + 'px';
     layer.appendChild(txt);
     setTimeout(() => txt.remove(), 1000);
-    
-    const num = isCrit ? 6 : 2;
-    for(let i=0; i<num; i++) {
-      const p = document.createElement('div');
-      p.className = 'coin-particle';
-      p.style.left = x + 'px'; p.style.top = y + 'px';
-      p.style.setProperty('--tx', (Math.random()*200 - 100) + 'px');
-      p.style.setProperty('--ty', (Math.random()*-200 - 50) + 'px');
-      layer.appendChild(p);
-      setTimeout(() => p.remove(), 800);
-    }
   }
 };
 
 window.onload = async () => {
   try {
     const data = await API.load();
-    if (data.save?.settings) {
-      audio.settings.music = data.save.settings.music ?? true;
-      audio.settings.sfx = data.save.settings.sound ?? true;
-    }
-    document.getElementById('btn-toggle-music').textContent = audio.settings.music ? '🎵 Music: ON' : '🎵 Music: OFF';
-    document.getElementById('btn-toggle-sfx').textContent = audio.settings.sfx ? '🔊 SFX: ON' : '🔊 SFX: OFF';
-    if (audio.settings.music) {
-      document.addEventListener('click', () => audio.startMusic(), { once: true });
-    }
-    
     game.init(data.save, data.history);
-  } catch(e) {
-    console.error("Boot failed", e);
-  }
+    
+    document.addEventListener('click', () => {
+      audio.init();
+      if (audio.settings.music) audio.startMusic();
+    }, { once: true });
+    
+  } catch(e) { console.error("Boot failed", e); }
 };
 </script>
 </body>

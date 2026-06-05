@@ -13,16 +13,14 @@
 
     :root {
       --bg-deep:    #050508;
-      --bg-mid:     #0d0e15;
-      --bg-top:     #1a0b2e;
       --text:       #f0f4f8;
       --muted:      #a0aec0;
       --cyan:       #00f0ff;
       --gold:       #ffb800;
       --rose:       #ff2a6d;
-      --card-bg:    rgba(15, 12, 30, 0.55);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --input-bg:   rgba(255, 255, 255, 0.04);
+      --card-bg:    rgba(15, 12, 30, 0.4);
+      --card-border: rgba(255, 255, 255, 0.15);
+      --input-bg:   rgba(255, 255, 255, 0.05);
       --input-border: rgba(255, 255, 255, 0.10);
     }
 
@@ -34,523 +32,215 @@
       overflow: hidden;
     }
 
-    /* ── Animated Dot Grid Background ──────────────────── */
-    canvas#dotGrid {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
+    /* ── Background Kitties Animation ──────────────────── */
+    .bg-kitties {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    
+    .kitty {
+      position: absolute; font-size: 64px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
+      opacity: 0.3;
     }
 
-    /* ambient glow orbs */
+    /* Lurking Kitty */
+    .kitty-lurk {
+      bottom: -20px; left: 10%;
+      animation: lurk 8s infinite;
+    }
+    @keyframes lurk {
+      0%, 20% { transform: translateY(50px); opacity: 0; }
+      40%, 60% { transform: translateY(0px); opacity: 0.5; }
+      80%, 100% { transform: translateY(50px); opacity: 0; }
+    }
+
+    /* Sleeping Kitty */
+    .kitty-sleep {
+      top: 20%; right: 15%;
+      animation: sleep 4s infinite alternate;
+    }
+    @keyframes sleep {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.05); }
+    }
+
+    /* Eating/Walking Kitty */
+    .kitty-walk {
+      bottom: 20%; right: -100px;
+      animation: walk 20s linear infinite;
+    }
+    @keyframes walk {
+      0% { transform: translateX(0) scaleX(-1); }
+      100% { transform: translateX(-120vw) scaleX(-1); }
+    }
+
+    /* ── ambient glow orbs ────────────────────────────── */
     .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(100px);
-      opacity: 0.18;
-      z-index: 0;
-      pointer-events: none;
+      position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.18; z-index: 0; pointer-events: none;
       animation: orbFloat 12s ease-in-out infinite alternate;
     }
     .orb--cyan  { width: 420px; height: 420px; background: var(--cyan); top: -10%; left: -8%; }
     .orb--gold  { width: 340px; height: 340px; background: var(--gold); bottom: -12%; right: -6%; animation-delay: -4s; }
     .orb--rose  { width: 260px; height: 260px; background: var(--rose); top: 50%; left: 60%; animation-delay: -8s; opacity: 0.10; }
 
-    @keyframes orbFloat {
-      0%   { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(30px, -20px) scale(1.12); }
-    }
+    @keyframes orbFloat { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, -20px) scale(1.12); } }
 
-    /* ── Layout ────────────────────────────────────────── */
-    .page {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-    }
+    /* ── Layout & Card ─────────────────────────────────── */
+    .page { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
 
-    /* ── Card ──────────────────────────────────────────── */
     .card {
-      width: 100%;
-      max-width: 420px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
-      padding: 40px 32px 36px;
-      backdrop-filter: blur(32px) saturate(1.4);
-      -webkit-backdrop-filter: blur(32px) saturate(1.4);
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.03) inset,
-        0 2px 40px rgba(0, 0, 0, 0.55),
-        0 0 120px -40px rgba(0, 240, 255, 0.08);
-      opacity: 0;
-      transform: translateY(28px) scale(0.97);
+      width: 100%; max-width: 420px; background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 24px; padding: 40px 32px 36px;
+      backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset, 0 8px 32px rgba(0, 0, 0, 0.4);
+      opacity: 0; transform: translateY(28px) scale(0.97);
       animation: cardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
     }
 
-    @keyframes cardIn {
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
+    @keyframes cardIn { to { opacity: 1; transform: translateY(0) scale(1); } }
 
     /* ── Brand ─────────────────────────────────────────── */
-    .brand {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-
+    .brand { text-align: center; margin-bottom: 28px; }
     .sigil {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 56px;
-      height: 56px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, var(--cyan), var(--gold));
-      color: #0d0e15;
-      font-weight: 800;
-      font-size: 22px;
-      letter-spacing: -0.5px;
-      margin-bottom: 14px;
-      box-shadow: 0 4px 24px rgba(0, 240, 255, 0.25), 0 2px 8px rgba(255, 184, 0, 0.18);
-      position: relative;
-      animation: sigilPulse 3s ease-in-out infinite;
+      display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px;
+      border-radius: 16px; background: linear-gradient(135deg, var(--cyan), var(--gold)); color: #0d0e15;
+      font-weight: 800; font-size: 28px; margin-bottom: 14px; box-shadow: 0 4px 24px rgba(0, 240, 255, 0.25);
     }
-
-    @keyframes sigilPulse {
-      0%, 100% { box-shadow: 0 4px 24px rgba(0,240,255,0.25), 0 2px 8px rgba(255,184,0,0.18); }
-      50%      { box-shadow: 0 4px 36px rgba(0,240,255,0.40), 0 2px 12px rgba(255,184,0,0.30); }
-    }
-
-    .brand h1 {
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-      background: linear-gradient(135deg, var(--text) 30%, var(--cyan));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .brand p {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 4px;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      font-weight: 500;
-    }
+    .brand h1 { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, var(--text) 30%, var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .brand p { font-size: 13px; color: var(--muted); margin-top: 4px; text-transform: uppercase; font-weight: 500; }
 
     /* ── Tabs ──────────────────────────────────────────── */
-    .tabs {
-      display: flex;
-      background: rgba(255,255,255,0.04);
-      border-radius: 14px;
-      padding: 4px;
-      margin-bottom: 26px;
-      position: relative;
-    }
-
-    .tabs .slider {
-      position: absolute;
-      top: 4px;
-      left: 4px;
-      width: calc(50% - 4px);
-      height: calc(100% - 8px);
-      border-radius: 11px;
-      background: linear-gradient(135deg, var(--cyan), var(--gold));
-      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-      z-index: 0;
-      box-shadow: 0 2px 12px rgba(0,240,255,0.18);
-    }
-
-    .tabs.signup .slider {
-      transform: translateX(100%);
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 10px 0;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 600;
-      border: none;
-      background: none;
-      color: var(--muted);
-      cursor: pointer;
-      position: relative;
-      z-index: 1;
-      transition: color 0.3s;
-      border-radius: 11px;
-    }
-
-    .tab-btn.active {
-      color: #0d0e15;
-    }
+    .tabs { display: flex; background: rgba(255,255,255,0.04); border-radius: 14px; padding: 4px; margin-bottom: 26px; position: relative; }
+    .tabs .slider { position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); border-radius: 11px; background: linear-gradient(135deg, var(--cyan), var(--gold)); transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); z-index: 0; }
+    .tabs.signup .slider { transform: translateX(100%); }
+    .tab-btn { flex: 1; padding: 10px 0; text-align: center; font-size: 14px; font-weight: 600; border: none; background: none; color: var(--muted); cursor: pointer; position: relative; z-index: 1; transition: color 0.3s; }
+    .tab-btn.active { color: #0d0e15; }
 
     /* ── Form ──────────────────────────────────────────── */
-    .form-group {
-      margin-bottom: 16px;
-      max-height: 72px;
-      opacity: 1;
-      overflow: hidden;
-      transition: max-height 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-                  opacity 0.3s ease,
-                  margin-bottom 0.4s ease;
-    }
-
-    .form-group.hidden {
-      max-height: 0;
-      opacity: 0;
-      margin-bottom: 0;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      margin-bottom: 6px;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 12px 16px;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: 12px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 15px;
-      outline: none;
-      transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
-    }
-
-    .form-group input::placeholder {
-      color: rgba(160, 174, 192, 0.45);
-    }
-
-    .form-group input:focus {
-      border-color: rgba(0, 240, 255, 0.45);
-      background: rgba(0, 240, 255, 0.03);
-      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.08), 0 0 20px -6px rgba(0, 240, 255, 0.15);
-    }
+    .form-group { margin-bottom: 16px; max-height: 72px; opacity: 1; overflow: hidden; transition: all 0.4s ease; }
+    .form-group.hidden { max-height: 0; opacity: 0; margin-bottom: 0; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; }
+    .form-group input { width: 100%; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 12px; color: var(--text); font-size: 15px; outline: none; transition: all 0.3s; }
+    .form-group input:focus { border-color: rgba(0, 240, 255, 0.45); background: rgba(0, 240, 255, 0.03); box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.08); }
 
     /* ── Error ─────────────────────────────────────────── */
-    .error-msg {
-      font-size: 13px;
-      color: var(--rose);
-      margin-bottom: 14px;
-      min-height: 0;
-      overflow: hidden;
-      opacity: 0;
-      transition: opacity 0.3s, min-height 0.3s;
-      text-align: center;
-      font-weight: 500;
-    }
+    .error-msg { font-size: 13px; color: var(--rose); margin-bottom: 14px; opacity: 0; transition: opacity 0.3s; }
+    .error-msg.visible { opacity: 1; }
 
-    .error-msg.visible {
-      opacity: 1;
-      min-height: 20px;
-    }
-
-    /* ── Submit Button ─────────────────────────────────── */
+    /* ── Buttons ───────────────────────────────────────── */
     .btn-submit {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 14px;
-      background: linear-gradient(135deg, var(--cyan), var(--gold));
-      color: #0d0e15;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.3s;
-      box-shadow: 0 4px 20px rgba(0, 240, 255, 0.2), 0 2px 8px rgba(255, 184, 0, 0.12);
+      width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--text); color: var(--bg-deep);
+      font-size: 15px; font-weight: 700; cursor: pointer; position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
     }
+    .btn-submit:hover { transform: scale(0.98); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+    .btn-submit:active { transform: scale(0.95); }
 
-    .btn-submit::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.25), transparent 60%);
-      opacity: 0;
-      transition: opacity 0.3s;
+    .divider { display: flex; align-items: center; text-align: center; margin: 24px 0; color: var(--muted); font-size: 12px; }
+    .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--card-border); }
+    .divider span { padding: 0 10px; }
+
+    .footer-note { text-align: center; margin-top: 24px; font-size: 12px; color: var(--muted); }
+
+    /* ── Loading Screen Overlay ────────────────────────── */
+    #loadingOverlay {
+      position: fixed; inset: 0; background: rgba(10, 7, 16, 0.95); backdrop-filter: blur(20px);
+      z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.5s;
     }
+    #loadingOverlay.active { opacity: 1; pointer-events: auto; }
+    .loader-cat { font-size: 80px; animation: loaderBounce 1s infinite alternate; margin-bottom: 20px; }
+    .loader-bar { width: 200px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+    .loader-progress { width: 0%; height: 100%; background: var(--cyan); animation: loaderFill 2s infinite ease-in-out; }
+    
+    @keyframes loaderBounce { 0% { transform: translateY(0); } 100% { transform: translateY(-20px); } }
+    @keyframes loaderFill { 0% { width: 0%; transform: translateX(0); } 50% { width: 100%; transform: translateX(0); } 100% { width: 100%; transform: translateX(200px); } }
 
-    .btn-submit:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 28px rgba(0, 240, 255, 0.32), 0 2px 10px rgba(255, 184, 0, 0.20);
-    }
-
-    .btn-submit:hover::before { opacity: 1; }
-
-    .btn-submit:active {
-      transform: translateY(0) scale(0.985);
-    }
-
-    .btn-submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-
-    /* loading spinner inside button */
-    .btn-submit .spinner {
-      display: none;
-      width: 18px;
-      height: 18px;
-      border: 2.5px solid rgba(13, 14, 21, 0.3);
-      border-top-color: #0d0e15;
-      border-radius: 50%;
-      animation: spin 0.65s linear infinite;
-      margin: 0 auto;
-    }
-
-    .btn-submit.loading .btn-text { display: none; }
-    .btn-submit.loading .spinner  { display: block; }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Divider ───────────────────────────────────────── */
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin: 24px 0;
-    }
-
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--input-border), transparent);
-    }
-
-    .divider span {
-      font-size: 12px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      font-weight: 600;
-    }
-
-    /* ── Google Button Container ─────────────────────────────────── */
-    #googleBtn {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      margin-top: 8px;
-    }
-
-    /* ── Misc ──────────────────────────────────────────── */
-    ::selection {
-      background: rgba(0, 240, 255, 0.25);
-      color: #fff;
-    }
-
-    /* subtle scanline overlay */
-    .scanlines {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.03) 2px,
-        rgba(0,0,0,0.03) 4px
-      );
-    }
-
-    /* Footer */
-    .footer-note {
-      text-align: center;
-      margin-top: 22px;
-      font-size: 11.5px;
-      color: rgba(160, 174, 192, 0.45);
-      letter-spacing: 0.3px;
-    }
-
-    .footer-note a {
-      color: var(--cyan);
-      text-decoration: none;
-      opacity: 0.7;
-      transition: opacity 0.2s;
-    }
-    .footer-note a:hover { opacity: 1; }
-
-    /* Responsive */
-    @media (max-width: 480px) {
-      .card { padding: 32px 22px 28px; border-radius: 20px; }
-      .sigil { width: 48px; height: 48px; font-size: 19px; border-radius: 14px; }
-      .brand h1 { font-size: 21px; }
-    }
   </style>
 </head>
 <body>
 
-  <!-- Ambient glow orbs -->
+  <!-- Background Kitties -->
+  <div class="bg-kitties">
+    <div class="kitty kitty-lurk">🐈</div>
+    <div class="kitty kitty-sleep">💤 🐈</div>
+    <div class="kitty kitty-walk">🐈</div>
+  </div>
+
   <div class="orb orb--cyan"></div>
   <div class="orb orb--gold"></div>
   <div class="orb orb--rose"></div>
 
-  <!-- Dot grid canvas -->
-  <canvas id="dotGrid"></canvas>
-
-  <!-- Scanline overlay -->
-  <div class="scanlines"></div>
+  <!-- Loading Screen -->
+  <div id="loadingOverlay">
+    <div class="loader-cat">😸</div>
+    <div style="font-family: var(--font-header); font-size: 24px; font-weight: 700; margin-bottom: 15px; background: linear-gradient(135deg, var(--text) 30%, var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent;">Loading Universe...</div>
+    <div class="loader-bar"><div class="loader-progress"></div></div>
+  </div>
 
   <!-- Main content -->
   <div class="page">
     <div class="card" id="authCard">
-
-      <!-- Brand -->
       <div class="brand">
-        <div class="sigil">CC</div>
-        <h1>Cat Clicker</h1>
+        <div class="sigil">🐾</div>
+        <h1>Feline Ascendancy</h1>
         <p>Premium Desktop Adventure</p>
       </div>
 
-      <!-- Tabs -->
       <div class="tabs" id="tabs">
         <div class="slider"></div>
         <button class="tab-btn active" data-mode="login" type="button">Sign In</button>
         <button class="tab-btn" data-mode="signup" type="button">Sign Up</button>
       </div>
 
-      <!-- Form -->
       <form id="authForm" novalidate>
-        <!-- Display Name (signup only) -->
         <div class="form-group hidden" id="nameGroup">
           <label for="displayName">Display Name</label>
           <input type="text" id="displayName" placeholder="Your awesome name" autocomplete="name" />
         </div>
 
-        <!-- Email -->
         <div class="form-group">
           <label for="email">Email</label>
           <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required />
         </div>
 
-        <!-- Password -->
         <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" placeholder="Min. 8 characters" minlength="8" autocomplete="current-password" required />
         </div>
 
-        <!-- Error -->
         <div class="error-msg" id="errorMsg"></div>
 
-        <!-- Submit -->
         <button type="submit" class="btn-submit" id="submitBtn">
           <span class="btn-text">Sign In</span>
-          <div class="spinner"></div>
         </button>
       </form>
 
-      <!-- Divider -->
       <div class="divider"><span>or</span></div>
+      <div id="googleBtn" style="display:flex; justify-content:center;"></div>
 
-      <!-- Google button -->
-      <div id="googleBtn"></div>
-
-      <div class="footer-note">
-        &copy; 2026 Cat Clicker &middot; meow-powered
-      </div>
-
+      <div class="footer-note">&copy; 2026 Feline Ascendancy &middot; meow-powered</div>
     </div>
   </div>
 
   <script>
-    /* ── Dot Grid Animation ──────────────────────────── */
-    (function initDotGrid() {
-      const canvas = document.getElementById('dotGrid');
-      const ctx = canvas.getContext('2d');
-      let w, h, cols, rows;
-      const spacing = 38;
-      const dotBase = 0.8;
-      let mouse = { x: -1000, y: -1000 };
-      let time = 0;
-
-      function resize() {
-        w = canvas.width = window.innerWidth;
-        h = canvas.height = window.innerHeight;
-        cols = Math.ceil(w / spacing) + 1;
-        rows = Math.ceil(h / spacing) + 1;
-      }
-
-      window.addEventListener('resize', resize);
-      resize();
-
-      document.addEventListener('mousemove', e => {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-      });
-
-      function draw() {
-        ctx.clearRect(0, 0, w, h);
-        time += 0.004;
-
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            const x = c * spacing;
-            const y = r * spacing;
-            const dx = mouse.x - x;
-            const dy = mouse.y - y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const influence = Math.max(0, 1 - dist / 180);
-
-            const wave = Math.sin(time + c * 0.15 + r * 0.12) * 0.3 + 0.5;
-            const alpha = 0.04 + wave * 0.04 + influence * 0.35;
-            const radius = dotBase + influence * 1.8;
-
-            // colour: cyan tint near mouse, otherwise subtle grey
-            const g = Math.round(200 + influence * 55);
-            const b = Math.round(210 + influence * 45);
-            ctx.fillStyle = `rgba(${Math.round(150 + influence * 100)}, ${g}, ${b}, ${alpha})`;
-
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-        requestAnimationFrame(draw);
-      }
-      draw();
-    })();
-
-    /* ── Auth Logic ──────────────────────────────────── */
-    const tabs      = document.getElementById('tabs');
-    const tabBtns   = tabs.querySelectorAll('.tab-btn');
+    const tabs = document.getElementById('tabs');
+    const tabBtns = tabs.querySelectorAll('.tab-btn');
     const nameGroup = document.getElementById('nameGroup');
-    const form      = document.getElementById('authForm');
+    const form = document.getElementById('authForm');
     const submitBtn = document.getElementById('submitBtn');
-    const btnText   = submitBtn.querySelector('.btn-text');
-    const errorEl   = document.getElementById('errorMsg');
-    const googleBtn = document.getElementById('googleBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const errorEl = document.getElementById('errorMsg');
+    const loadingOverlay = document.getElementById('loadingOverlay');
 
     let mode = 'login'; // 'login' | 'signup'
 
-    /* Tab switching */
     tabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const newMode = btn.dataset.mode;
         if (newMode === mode) return;
         mode = newMode;
-
         tabBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
@@ -565,12 +255,10 @@
           btnText.textContent = 'Sign In';
           document.getElementById('password').autocomplete = 'current-password';
         }
-
         hideError();
       });
     });
 
-    /* Error helpers */
     function showError(msg) {
       errorEl.textContent = msg;
       errorEl.classList.add('visible');
@@ -579,30 +267,29 @@
       errorEl.classList.remove('visible');
       errorEl.textContent = '';
     }
+    
+    function triggerLoading() {
+      loadingOverlay.classList.add('active');
+    }
 
-    /* Form submit */
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       hideError();
 
-      const email    = document.getElementById('email').value.trim();
+      const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const displayName = document.getElementById('displayName').value.trim();
 
-      // Basic validation
       if (!email) return showError('Please enter your email.');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Enter a valid email address.');
       if (password.length < 8) return showError('Password must be at least 8 characters.');
       if (mode === 'signup' && !displayName) return showError('Please enter a display name.');
 
-      submitBtn.classList.add('loading');
       submitBtn.disabled = true;
 
       try {
         const endpoint = mode === 'signup' ? '/api/signup' : '/api/login';
-        const body = mode === 'signup'
-          ? { username: email, password, displayName }
-          : { username: email, password };
+        const body = mode === 'signup' ? { username: email, password, displayName } : { username: email, password };
 
         const res = await fetch(endpoint, {
           method: 'POST',
@@ -611,49 +298,39 @@
         });
 
         const result = await res.json();
+        if (!res.ok) throw new Error(result.error || result.message || 'Something went wrong.');
 
-        if (!res.ok) {
-          throw new Error(result.error || result.message || 'Something went wrong.');
-        }
-
-        // Store auth data
         localStorage.setItem('catClickerToken', result.token);
         localStorage.setItem('catClickerProfile', JSON.stringify(result.profile));
 
-        // Redirect
-        window.location.href = '/index.html';
-
+        triggerLoading();
+        setTimeout(() => window.location.href = '/index.html', 1500);
       } catch (err) {
         showError(err.message || 'Network error. Please try again.');
-      } finally {
-        submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
       }
     });
 
-    /* Google Sign In */
     function handleCredentialResponse(response) {
-      if (!response.credential) {
-        showError('Google sign in failed');
-        return;
-      }
-      submitBtn.classList.add('loading');
+      if (!response.credential) return showError('Google sign in failed');
       submitBtn.disabled = true;
+      
       fetch('/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ credential: response.credential })
       })
-      .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, body: data })))
-      .then(({ status, ok, body }) => {
+      .then(res => res.json().then(data => ({ ok: res.ok, body: data })))
+      .then(({ ok, body }) => {
         if (!ok) throw new Error(body.error || 'Google sign in failed');
         localStorage.setItem('catClickerToken', body.token);
         localStorage.setItem('catClickerProfile', JSON.stringify(body.profile));
-        window.location.href = '/index.html';
+        
+        triggerLoading();
+        setTimeout(() => window.location.href = '/index.html', 1500);
       })
       .catch(err => {
         showError(err.message);
-        submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
       });
     }
@@ -665,7 +342,7 @@
       });
       google.accounts.id.renderButton(
         document.getElementById("googleBtn"),
-        { theme: "filled_black", size: "large", width: 356, text: "continue_with", shape: "rectangular", logo_alignment: "left" }
+        { theme: "filled_black", size: "large", width: 356, text: "continue_with", shape: "rectangular" }
       );
     };
   </script>
